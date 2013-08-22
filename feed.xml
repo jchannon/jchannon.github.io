@@ -20,7 +20,7 @@
 
 &lt;p&gt;Selecting this gives you a basic http server app template.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="/images/blogpostimages/projectlayout.png" alt="Project Layout" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="/images/blogpostimages/projectlayout.PNG" alt="Project Layout" /&gt;&lt;/p&gt;
 
 &lt;p&gt;I like that they have tried to bring a &lt;a href="http://www.nuget.org/"&gt;NuGet&lt;/a&gt; style dialog for searching packages in &lt;a href="https://npmjs.org/"&gt;NPM&lt;/a&gt;.&lt;/p&gt;
 
@@ -51,7 +51,7 @@ console.log("Server running at http://127.0.0.1:8000/");
 &lt;p&gt;It fires up a console app and a browser:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src="/images/blogpostimages/console.png" alt="Console" /&gt;
-&lt;img src="/images/blogpostimages/helloworldbrowser.png" alt="Browser" /&gt;&lt;/p&gt;
+&lt;img src="/images/blogpostimages/helloworldbrowser.PNG" alt="Browser" /&gt;&lt;/p&gt;
 
 &lt;p&gt;I then went back to Visual Studio and put a breakpoint on the &lt;code&gt;response.end("Hello World\n");"&lt;/code&gt; to see what would happen when I refreshed my browser.&lt;/p&gt;
 
@@ -59,7 +59,7 @@ console.log("Server running at http://127.0.0.1:8000/");
 
 &lt;p&gt;It stopped on the breakpoint and gives me information about the objects in scope etc and let me step into the current line.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="/images/blogpostimages/F11.png" alt="F11" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="/images/blogpostimages/f11.png" alt="F11" /&gt;&lt;/p&gt;
 
 &lt;p&gt;That's a pretty basic hello world style of seeing what Visal Node can do but that static language side of me really likes the look of this and the potential it can bring. I beleive &lt;a href="http://www.jetbrains.com/webstorm"&gt;WebStorm&lt;/a&gt; also provides node.js debugging so check that out but for pure familiarity reasons I like the look of this.&lt;/p&gt;
 
