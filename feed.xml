@@ -1,4 +1,134 @@
-﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/08/22/a-quick-look-at-visual-node/</guid><link>http://blog.jonathanchannon.com/2013/08/22/a-quick-look-at-visual-node/</link><title>A quick look at Visual Node</title><description>&lt;p&gt;I came across &lt;a href="http://www.visualnode.info/"&gt;Visual Node&lt;/a&gt; a few months ago and was excited by the looks of it.  For those that didn't click that link, it basically brings the power of Visual Studio debugging to a node.js app.  You can write your node.js app in Visual Studio, fire up the debugger by hitting F5 and use breakpoints and watches to see what's going on.  &lt;/p&gt;
+﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/08/24/async-routing-with-nancy/</guid><link>http://blog.jonathanchannon.com/2013/08/24/async-routing-with-nancy/</link><title>Async Routing with Nancy</title><description>&lt;p&gt;I don't know about you but all I hear is "ASYNC ALL THE THINGS!", I think is partly down to its new and shiny and us developers love "the shiny" and partly a lot of the things we do in our applications are I/O based whether that be database or file system. &lt;/p&gt;
+
+&lt;p&gt;The problem that comes with the new and shiny bandwagon is you need to understand what you're evangelising. Making asynchronous methods and executing them with no actual reason will not give your codebase any gains and could actually effect your application's performance.  There is more depth to that argument but for simplicity just remember this, only use asynchronous methods if you are doing some sort of I/O. &lt;/p&gt;
+
+&lt;p&gt;It could also be argued that only "use asynchronicity in a web framework if you expect high traffic in your web application". If you only have 10 requests on a small site you're not going to benefit from asynchronous execution as there are plenty of threads available to handle your application.  If you start hitting 1000 concurrent requests (the default IIS limit) then requests will start getting queued up.  If you make your routes asynchronous then any code that is being waited on, the thread that is being used there can be released to process another request thus speeding up the performance of your app and prevent the likely hood of large queues.  I will show how simple it is to make your routes asynchronous with Nancy below.&lt;/p&gt;
+
+</description><pubDate>Fri, 23 Aug 2013 23:00:00 Z</pubDate><a10:updated>2013-08-23T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I don't know about you but all I hear is "ASYNC ALL THE THINGS!", I think is partly down to its new and shiny and us developers love "the shiny" and partly a lot of the things we do in our applications are I/O based whether that be database or file system. &lt;/p&gt;
+
+&lt;p&gt;The problem that comes with the new and shiny bandwagon is you need to understand what you're evangelising. Making asynchronous methods and executing them with no actual reason will not give your codebase any gains and could actually effect your application's performance.  There is more depth to that argument but for simplicity just remember this, only use asynchronous methods if you are doing some sort of I/O. &lt;/p&gt;
+
+&lt;p&gt;It could also be argued that only "use asynchronicity in a web framework if you expect high traffic in your web application". If you only have 10 requests on a small site you're not going to benefit from asynchronous execution as there are plenty of threads available to handle your application.  If you start hitting 1000 concurrent requests (the default IIS limit) then requests will start getting queued up.  If you make your routes asynchronous then any code that is being waited on, the thread that is being used there can be released to process another request thus speeding up the performance of your app and prevent the likely hood of large queues.  I will show how simple it is to make your routes asynchronous with Nancy below.&lt;/p&gt;
+
+&lt;!--excerpt--&gt;
+
+&lt;h2&gt;Using Async with Nancy&lt;/h2&gt;
+
+&lt;p&gt;With the introduction of &lt;code&gt;async/await&lt;/code&gt; in .NET 4.5 the way to do asynchronous execution simplified the previous approaches in .NET.  Having asynchronous execution within a web framework these days seems to be a "must have" so the Nancy team got their freak on (mainly &lt;a href="http://twitter.com/grumpydev"&gt;@grumpydev&lt;/a&gt;) and enabled async/await within Nancy.  Its codebase has been kept backward compatible with .NET 4.0 but has been enabled to use the .NET 4.5 &lt;code&gt;async/await&lt;/code&gt;, pretty impressive! In fact it uses its own version of &lt;code&gt;ContinueWith&lt;/code&gt; as the default one was considered not quick enough along with other &lt;a href="http://msdn.microsoft.com/en-us/library/dd460717.aspx"&gt;TPL&lt;/a&gt; optimizations.&lt;/p&gt;
+
+&lt;p&gt;Below is the synchronous version of returning "Hello World":&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class SampleModule : Nancy.NancyModule
+{
+    public SampleModule()
+    {
+        Get["/"] = parameters =&amp;gt; "Hello World!";
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If we wanted to make this &lt;code&gt;async&lt;/code&gt; (although we wouldn't as there is no I/O and we wouldn't see any benefit) we would change it to look this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class SampleModule : Nancy.NancyModule
+{
+    public SampleModule()
+    {
+        Get["/", true] = async (parameters, ct) =&amp;gt; "Hello World!";
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Simple and elegant hey?!&lt;/p&gt;
+
+&lt;p&gt;So what's going on you say?  Well the boolean of "true" on the request path tells Nancy that the request is marked as asynchronous.  We can then mark the route as &lt;code&gt;async&lt;/code&gt; as you would any &lt;code&gt;async&lt;/code&gt; method and the delegate of the route now takes and additional &lt;code&gt;CancellationToken&lt;/code&gt; along with the captured parameters.  If you wanted you could use named parameters and define your route like so: &lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class SampleModule : Nancy.NancyModule
+{
+    public SampleModule()
+    {
+        Get["/", runAsync:true] = async (parameters, ct) =&amp;gt; "Hello World!";
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;CancellationToken&lt;/code&gt; is passed in so you can check the &lt;code&gt;ct.IsCancellationRequested&lt;/code&gt; property to determine if you want to cooperatively cancel processing in your route handler.  This property may be set for example if there is an internal error or if a piece of middleware decides to cancel the request, or the host is shutting down. If you didn't know Nancy is OWIN compliant and has been pretty much since the OWIN specification came out.&lt;/p&gt;
+
+&lt;h2&gt;Demo Time&lt;/h2&gt;
+
+&lt;p&gt;As I stated above, returning "Hello World" from an asynchronous route is pointless so we need something I/O bound to demonstrate a bit better how we would use async/await in an application.&lt;/p&gt;
+
+&lt;p&gt;Lets imagine we are one of those types that love QR codes and we need to generate one:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class IndexModule : NancyModule
+{
+    public IndexModule()
+    {
+        Get["/"] = parameters =&amp;gt; View["Index"];
+
+        Post["/", true] = async (x, ctx) =&amp;gt;
+        {
+            var link = await GetQrCode();
+            var model = new { QrPath = link };
+            return View["Index", model];
+        };
+    }
+
+    private async Task&amp;lt;string&amp;gt; GetQrCode()
+    {
+        var client = new HttpClient();
+        client.DefaultRequestHeaders.Add("X-Mashape-Authorization", "oEzDRdFudTpsuLtmgewrIGcuj08tK7PI");
+        var response = await client.GetAsync(
+                "https://mutationevent-qr-code-generator.p.mashape.com/generate.php?content=http://www.nancyfx.org&amp;amp;type=url");
+
+        var stringContent = await response.Content.ReadAsStringAsync();
+
+        dynamic model = JsonObject.Parse(stringContent); 
+
+        return model["image_url"];
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here we have a GET that returns a view and then an async POST that &lt;code&gt;await&lt;/code&gt;'s a &lt;code&gt;GetQrCode&lt;/code&gt; method that returns a &lt;code&gt;Task&amp;lt;string&amp;gt;&lt;/code&gt; or &lt;code&gt;string&lt;/code&gt; depending on how you interpret that specific .NET 4.5 behaviour.  At this point the thread can be used to process another request whilst it waits to be notified that &lt;code&gt;GetQrCode&lt;/code&gt; has finished.  &lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;GetQrCode&lt;/code&gt; method uses a &lt;code&gt;HttpClient&lt;/code&gt; to execute an API call to get a QR code which will link to http://www.nancyfx.org.  Our method will then return the location of the QR code image. Anything marked with &lt;code&gt;async&lt;/code&gt; needs an &lt;code&gt;await&lt;/code&gt; otherwise it will just execute synchronously.  In our method we execute an asynchronous call (just like our async route) to the API so we &lt;code&gt;await&lt;/code&gt; it and once we do we &lt;code&gt;await&lt;/code&gt; reading the response as &lt;code&gt;string&lt;/code&gt; and then parse the JSON content to a dynamic type.  We return a string but the compiler will actually convert that to a &lt;code&gt;Task&amp;lt;string&amp;gt;&lt;/code&gt; for us.  "An await expression does not block the thread on which it is executing. Instead, it causes the compiler to sign up the rest of the async method as a continuation on the awaited task. Control then returns to the caller of the async method. When the task completes, it invokes its continuation, and execution of the async method resumes where it left off."&lt;a href="http://msdn.microsoft.com/en-us/library/vstudio/hh156528.aspx"&gt;MSDN&lt;/a&gt;  Once the &lt;code&gt;GetQrCode&lt;/code&gt; returns we set up a simple anonymous type with a QrPath property that is set to the result of &lt;code&gt;GetQrCode&lt;/code&gt; and we return our view.  &lt;/p&gt;
+
+&lt;p&gt;In the view we then have some code that determines when to show the resized image:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;@if (Model != null)
+{
+    &amp;lt;img alt="QR Code" src="[ERR!]"/&amp;gt;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can view this code as a running application in my Github repository &lt;a href="https://github.com/jchannon/Nancy.Demo.Async"&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2&gt;The Guts of it&lt;/h2&gt;
+
+&lt;p&gt;If you want a bit more of an understanding how &lt;code&gt;async/await&lt;/code&gt; works in Nancy then lets take a look at the code below that is located in the &lt;a href="https://github.com/NancyFx/Nancy/blob/master/src/Nancy/Routing/DefaultRouteInvoker.cs"&gt;DefaultRouteInvoker&lt;/a&gt; class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public Task&amp;lt;Response&amp;gt; Invoke(Route route, CancellationToken cancellationToken, DynamicDictionary parameters, NancyContext context)
+{
+    var tcs = new TaskCompletionSource&amp;lt;Response&amp;gt;();
+
+    var result = route.Invoke(parameters, cancellationToken);
+
+    result.WhenCompleted(
+       completedTask =&amp;gt;
+        {
+            var returnResult = completedTask.Result;
+            ...
+        }
+    ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Our route that we are executing is invoked and as we know from above the captured parameters on the route eg/customer/{id} and a CancellationToken is passed in.  We can then see the customized &lt;code&gt;ContinueWith&lt;/code&gt; known as &lt;code&gt;WhenCompleted&lt;/code&gt; is setup to resolve what our route returns be that a view or data.  So as we know when using async we need to return a &lt;code&gt;Task&amp;lt;T&amp;gt;&lt;/code&gt; (you can return void and have a method marked as &lt;code&gt;async&lt;/code&gt; but those should only be used for fire-and-forget methods like event handlers) and in our routes case it returns a Task&lt;Nancy.Responses.Negotiation.Negotiator&gt;.  The DefaultRouteInvoker then carries on to do its thing getting ready to render a view or serialize our data.&lt;/p&gt;
+
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;So there's the scope of async/await in Nancy, all the goodies of Nancy still apply now with the addition of asynchronous routes.  If you have read this blog post and not used Nancy before please read &lt;a href="http://blog.jonathanchannon.com/2012/12/19/why-use-nancyfx/"&gt;this blog post&lt;/a&gt; which reminds me I need to add "ASYNC ALL THE THINGS" to the list of reasons to use Nancy!&lt;/p&gt;
+</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/08/22/a-quick-look-at-visual-node/</guid><link>http://blog.jonathanchannon.com/2013/08/22/a-quick-look-at-visual-node/</link><title>A quick look at Visual Node</title><description>&lt;p&gt;I came across &lt;a href="http://www.visualnode.info/"&gt;Visual Node&lt;/a&gt; a few months ago and was excited by the looks of it.  For those that didn't click that link, it basically brings the power of Visual Studio debugging to a node.js app.  You can write your node.js app in Visual Studio, fire up the debugger by hitting F5 and use breakpoints and watches to see what's going on.  &lt;/p&gt;
 
 &lt;p&gt;The hipster in me is screaming saying "You should be using Sublime Text and &lt;a href="https://github.com/dannycoates/node-inspector"&gt;node-inspector&lt;/a&gt; for debugging" but to be honest I found it a bit hackety-hack and it seemed a bit odd debugging my server app in Chrome but maybe that's just something I need to get over.  JavaScript is getting a huge surge in popularity recently so its your duty as a developer to investigate this.  I want to learn and understand JS better but I always get frustrated with it after 10mins and swear that I'm never going to touch a dynamic language again, "give me a statically typed language every time with a compiler".  I have a bit of a Jekyll and Hyde situation going on that I need to overcome.&lt;/p&gt;
 
@@ -688,122 +818,4 @@ public OrderController(IUnitOfWork unitOfWork )
 &lt;h2&gt;Conclusion&lt;/h2&gt;
 
 &lt;p&gt;I only touched the basics of implementing EF into a MVC app but these approaches did take quite a while to discover and after hearing all the negativity towards EF and drawing from my experience I think I could see why people have issues with it in a much larger application as I’m sure there are other caveats to using EF. The biggest issue I saw with it was not exposing a Save method for the model type you were using, instead you have to commit all changes across the database context. I feel this made it quite difficult to create a decent architecture. I can see in a large enterprise application why EF could be helpful in allowing it to query the database for you and create/modify the tables for you based on your model changes but I think for now in smaller applications I think I still prefer micro-ORMs like PetaPoco, Dapper or Simple.Data due to the control it gives you and also the ease in which you can abstract the database communication. As &lt;a href="https://twitter.com/Cranialstrain"&gt;@Cranialstrain&lt;/a&gt; says “the database is an implementation detail”. I’d also like to thank all those on Jabbr that helped me with the above approaches and long discussions had about Entity Framework!&lt;/p&gt;
-</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/02/05/evaluating-knockoutjs-and-angularjs-part-1/</guid><link>http://blog.jonathanchannon.com/2013/02/05/evaluating-knockoutjs-and-angularjs-part-1/</link><title>Evaluating KnockoutJS and AngularJS – Part 1</title><description>&lt;p&gt;As I stated in my earlier post &lt;a href="http://blog.jonathanchannon.com/2013/01/09/javascript-is-the-future-maybe/" title="JavaScript is the future…maybe!"&gt;“JavaScript is the future…maybe”&lt;/a&gt; so with that in mind I had to brush up my JS skills and get more involved with the language’s core concepts so after watching some videos and reading some articles I was ready to look at &lt;a href="http://knockoutjs.com"&gt;KnockoutJS&lt;/a&gt; and &lt;a href="http://angularjs.org/"&gt;AngularJS&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Before I actually looked at these two I spent some time with &lt;a href="http://sammyjs.org/"&gt;SammyJS&lt;/a&gt; but realised afterwards it was mainly MVC based and not around 2-way binding that Knockout and Angular offer. However, I really liked it and it seemed very familiar and easy to use, the reason being it was inspired by &lt;a href="http://www.sinatrarb.com/"&gt;Sinatra&lt;/a&gt; which we all know &lt;a href="http://nancyfx.org/"&gt;Nancy&lt;/a&gt; was also inspired by and we also know how much &lt;a href="http://nancyfx.org/mvm.html"&gt;I like Nancy&lt;/a&gt;!&lt;/p&gt;
-
-&lt;p&gt;Getting to grips with any language or frameworks is tricky and the best way to do it is to write an application using it. The next difficult thing to overcome is an idea for writing an application. ToDo list’s are very common with JavaScript frameworks and there is a whole website for you to peruse but after looking at SammyJS and their docs they walk through writing a simple shopping basket so I thought I’d use that.&lt;/p&gt;
-
-</description><pubDate>Tue, 05 Feb 2013 00:00:00 Z</pubDate><a10:updated>2013-02-05T00:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;As I stated in my earlier post &lt;a href="http://blog.jonathanchannon.com/2013/01/09/javascript-is-the-future-maybe/" title="JavaScript is the future…maybe!"&gt;“JavaScript is the future…maybe”&lt;/a&gt; so with that in mind I had to brush up my JS skills and get more involved with the language’s core concepts so after watching some videos and reading some articles I was ready to look at &lt;a href="http://knockoutjs.com"&gt;KnockoutJS&lt;/a&gt; and &lt;a href="http://angularjs.org/"&gt;AngularJS&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Before I actually looked at these two I spent some time with &lt;a href="http://sammyjs.org/"&gt;SammyJS&lt;/a&gt; but realised afterwards it was mainly MVC based and not around 2-way binding that Knockout and Angular offer. However, I really liked it and it seemed very familiar and easy to use, the reason being it was inspired by &lt;a href="http://www.sinatrarb.com/"&gt;Sinatra&lt;/a&gt; which we all know &lt;a href="http://nancyfx.org/"&gt;Nancy&lt;/a&gt; was also inspired by and we also know how much &lt;a href="http://nancyfx.org/mvm.html"&gt;I like Nancy&lt;/a&gt;!&lt;/p&gt;
-
-&lt;p&gt;Getting to grips with any language or frameworks is tricky and the best way to do it is to write an application using it. The next difficult thing to overcome is an idea for writing an application. ToDo list’s are very common with JavaScript frameworks and there is a whole website for you to peruse but after looking at SammyJS and their docs they walk through writing a simple shopping basket so I thought I’d use that.&lt;/p&gt;
-
-&lt;!--excerpt--&gt;
-
-&lt;p&gt;If you just want to get to the code then feel free to take a look here for &lt;a href="https://github.com/jchannon/AngularShopping"&gt;Angular&lt;/a&gt; and here for &lt;a href="https://github.com/jchannon/KnockoutShopping"&gt;Knockout&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;This blog post will concentrate on AngularJS.&lt;/p&gt;
-
-&lt;h2&gt;Angular&lt;/h2&gt;
-
-&lt;p&gt;After looking at the demos on the the home page and reading the docs I was ready to start. (I also got recommended &lt;a href="http://egghead.io/"&gt;egghead.io&lt;/a&gt; for lots of free AngularJS videos)&lt;/p&gt;
-
-&lt;p&gt;I liked the look of Angular’s data bindings, it was very similar to &lt;a href="http://handlebarsjs.com/"&gt;HandlebarsJS&lt;/a&gt; which is a templating engine for JS and their specific attributes for doing certain things in the DOM seemed clean.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;input type="text" ng-model="yourName" placeholder="Enter a name here"&amp;gt;
-&amp;lt;hr&amp;gt;
-&amp;lt;h1&amp;gt;Hello {{yourName}}!&amp;lt;/h1&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Angular uses “Controllers” and coming from experience with MVC it turned out they’re not really controllers but more ViewModels. Each Controller handles its own specific task for example, in CRUD you’d probably have a controller for each create, read, update and delete. I believe its possible to make it have one controller but that’s a bit more advanced!&lt;/p&gt;
-
-&lt;p&gt;The data in the SammyJS demo comes via a data.json file so I duly created my file and followed the examples of wiring up a backend. This is when things start getting a bit more in depth with Angular opposed to a simple Hello World app. Angular provides its own internal IOC container which is recommended you use to keep things nicely separated and of course it then injects your controller’s dependencies for you. See &lt;a href="http://docs.angularjs.org/guide/di"&gt;here&lt;/a&gt; for more about the subject. There is a bit of configuration needed in various places and one missing item or spelling mistake and you’ll be stuck due to the nature of dynamic nature of JavaScript.&lt;/p&gt;
-
-&lt;p&gt;I finally managed to get my wirings all sorted and my products displayed on screen but when I wanted to retrieve a single item this is when I started scratching my head. The recommended way of doing it was to use an abstracted class called $resource which allows you to query REST based services and obviously with just having one file this wasn’t going to work. $resource sits on top of $http but after playing with that I discarded my file and stuck it in memory for ease. If you’d like to see a $http demo with Nancy as a REST service see &lt;a href="http://blogs.lessthandot.com/index.php/WebDev/UIDevelopment/Javascript/angularjs"&gt;this blog post&lt;/a&gt; from &lt;a href="http://blogs.lessthandot.com/index.php/All/?disp=authdir&amp;amp;author=7"&gt;Christiaan Baes&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;So now with a bit of filtering I could find my product and display it on screen. I had a controller for listing my products and another controller for displaying one item and a dependency injected into both to allow me to retrieve the data I wanted to display and I also had my routing setup.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;//Routing
-var app = angular.module('myCart', []).
-        config(function ($routeProvider) {
-            $routeProvider.
-                when('/', {
-                    controller: 'IndexController',
-                    templateUrl: '/templates/list.html'
-                }).
-                when('/:id', {
-                    controller: 'DetailController',
-                    templateUrl: '/templates/detail.html'
-                }).
-                otherwise({ redirectTo: '/' });
-        });
-
-//Repository
-app.factory('shoppingItemsService', function () {
-        var data = [
-            //My data is here!
-        ];
-
-        return {
-            getItems: function () { return data; },
-            getItem: function (itemId) {
-                return data.filter(function (x) { return x.id === parseInt(itemId, 10); })[0];
-            }
-        };
-    });
-
-//List Controller
-app.controller(
-        'IndexController',
-        function ($scope, shoppingItemsService) {
-            $scope.items = shoppingItemsService.getItems();
-        }
-    );
-
-//Detail Controller
-app.controller(
-        'DetailController',
-        function ($scope, $routeParams, basketService, shoppingItemsService) {
-
-            $scope.item = shoppingItemsService.getItem($routeParams.id);
-            $scope.item.quantity = 1;
-
-            $scope.item.basketCount = basketService.getCount();
-
-            $scope.addItem = function () {
-                basketService.addItem($scope.item);
-            };
-        }
-    );
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;As the app is based around a single page application (SPA) the main area on the screen would show the products or product selected however I had an area, the cart info, that showed the quantity of items in my basket outside this main area. After a lot of head scratching I realised I could create a new controller that was responsible for setting a viewmodel property of the quantity and only update that specific area on screen. This meant when I was viewing a product and added a certain quantity to the basket this area would update automatically. Finally in the demo for a bit of added pizazz the cart info area animates.&lt;/p&gt;
-
-&lt;p&gt;This is the one bit that took me a long time to get my head around. Angular recommends that no DOM manipulation occurs in controllers but in separate classes/functions called Directives. I understand why, to keep your viewmodel not dependent on your view but man it was hard work! Directives allow you to determine your own HTML elements that Angular understands, again you can pass in dependencies and they will get resolved for you. Put whatever logic you want in your directive and then manipulate the DOM.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;app.directive('quantity', function () {
-        var linker = function (scope, element, attrs, basketService) {
-
-            scope.$watch(attrs.quantity, function (value, oldValue) {
-                if (value &amp;gt; oldValue) {
-                    element
-                    .animate({ paddingTop: '30px' })
-                    .animate({ paddingTop: '10px' });
-                }
-            }, true);
-        };
-
-        return {
-            restrict: 'A',
-            link: linker
-        };
-    });
-
-//Usage
-&amp;lt;div class="cart-info" ng-controller="CartController" quantity="basketCount()"&amp;gt;&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;One of the biggest things I found with Angular was that it was quite fiddly to setup however the documentation was very good and I had help from &lt;a href="http://twitter.com/philjones88"&gt;Phil Jones&lt;/a&gt;. Once I had solved whatever issue I was having at the time it was glaringly obvious what was needed and I why I was having problems but that’s all part of the learning curve I guess but mighty frustrating. Angular is certainly all encompassing by handling routing, model binding, separation of concerns and much more and so for a large app I can certainly see its potential but for small apps it may be a bit over the top but overall I did like it. There are also library extensions such as &lt;a href="http://angular-ui.github.com/"&gt;AngularUI&lt;/a&gt; which provide custom directives for DOM manipulation, ranked &lt;a href="http://ngmodules.org/"&gt;popular modules&lt;/a&gt; and specific &lt;a href="https://github.com/angular/angularjs-batarang"&gt;Angular debuggers&lt;/a&gt; so this framework certainly has a lot behind it and I definitely think it will be sticking around for a while.&lt;/p&gt;
 </a10:content></item></channel></rss>
