@@ -78,7 +78,8 @@
         var client = new HttpClient();
         client.DefaultRequestHeaders.Add("X-Mashape-Authorization", "oEzDRdFudTpsuLtmgewrIGcuj08tK7PI");
         var response = await client.GetAsync(
-                "https://mutationevent-qr-code-generator.p.mashape.com/generate.php?content=http://www.nancyfx.org&amp;amp;type=url", ct);
+                "https://mutationevent-qr-code-generator.p.mashape.com/generate.php?content=http://www.nancyfx.org&amp;amp;type=url"
+                , ct);
 
         var stringContent = await response.Content.ReadAsStringAsync();
         ct.ThrowIfCancellationRequested();
