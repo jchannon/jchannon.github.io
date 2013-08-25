@@ -76,9 +76,10 @@
     private async Task&amp;lt;string&amp;gt; GetQrCode()
     {
         var client = new HttpClient();
-        client.DefaultRequestHeaders.Add("X-Mashape-Authorization", "oEzDRdFudTpsuLtmgewrIGcuj08tK7PI");
+        client.DefaultRequestHeaders
+            .Add("X-Mashape-Authorization", "oEzDRdFudTpsuLtmgewrIGcuj08tK7PI");
         var response = await client.GetAsync(
-                "https://mutationevent-qr-code-generator.p.mashape.com/generate.php?content=http://www.nancyfx.org&amp;amp;type=url");
+            "https://mutationevent-qr-code-generator.p.mashape.com/generate.php?content=http://www.nancyfx.org&amp;amp;type=url");
 
         var stringContent = await response.Content.ReadAsStringAsync();
 
@@ -91,9 +92,19 @@
 
 &lt;p&gt;Here we have a GET that returns a view and then an async POST that &lt;code&gt;await&lt;/code&gt;'s a &lt;code&gt;GetQrCode&lt;/code&gt; method that returns a &lt;code&gt;Task&amp;lt;string&amp;gt;&lt;/code&gt; or &lt;code&gt;string&lt;/code&gt; depending on how you interpret that specific .NET 4.5 behaviour.  At this point the thread can be used to process another request whilst it waits to be notified that &lt;code&gt;GetQrCode&lt;/code&gt; has finished.  &lt;/p&gt;
 
-&lt;p&gt;The &lt;code&gt;GetQrCode&lt;/code&gt; method uses a &lt;code&gt;HttpClient&lt;/code&gt; to execute an API call to get a QR code which will link to http://www.nancyfx.org.  Our method will then return the location of the QR code image. Anything marked with &lt;code&gt;async&lt;/code&gt; needs an &lt;code&gt;await&lt;/code&gt; otherwise it will just execute synchronously.  In our method we execute an asynchronous call (just like our async route) to the API so we &lt;code&gt;await&lt;/code&gt; it and once we do we &lt;code&gt;await&lt;/code&gt; reading the response as &lt;code&gt;string&lt;/code&gt; and then parse the JSON content to a dynamic type.  We return a string but the compiler will actually convert that to a &lt;code&gt;Task&amp;lt;string&amp;gt;&lt;/code&gt; for us.  "An await expression does not block the thread on which it is executing. Instead, it causes the compiler to sign up the rest of the async method as a continuation on the awaited task. Control then returns to the caller of the async method. When the task completes, it invokes its continuation, and execution of the async method resumes where it left off."&lt;a href="http://msdn.microsoft.com/en-us/library/vstudio/hh156528.aspx"&gt;MSDN&lt;/a&gt;  Once the &lt;code&gt;GetQrCode&lt;/code&gt; returns we set up a simple anonymous type with a QrPath property that is set to the result of &lt;code&gt;GetQrCode&lt;/code&gt; and we return our view.  &lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;GetQrCode&lt;/code&gt; method uses a &lt;code&gt;HttpClient&lt;/code&gt; to execute an API call to get a QR code which will link to http://www.nancyfx.org.  Our method will then return the location of the QR code image. &lt;/p&gt;
 
-&lt;p&gt;In the view we then have some code that determines when to show the resized image:&lt;/p&gt;
+&lt;p&gt;Anything marked with &lt;code&gt;async&lt;/code&gt; needs an &lt;code&gt;await&lt;/code&gt; otherwise it will just execute synchronously.  In our method we execute an asynchronous call (just like our async route) to the API so we &lt;code&gt;await&lt;/code&gt; it and once we do we &lt;code&gt;await&lt;/code&gt; reading the response as &lt;code&gt;string&lt;/code&gt; and then parse the JSON content to a dynamic type.  &lt;/p&gt;
+
+&lt;p&gt;We return a string from the method but the compiler will actually convert that to a &lt;code&gt;Task&amp;lt;string&amp;gt;&lt;/code&gt; for us.  &lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;"An await expression does not block the thread on which it is executing. Instead, it causes the compiler to sign up the rest of the async method as a continuation on the awaited task. Control then returns to the caller of the async method. When the task completes, it invokes its continuation, and execution of the async method resumes where it left off."&lt;a href="http://msdn.microsoft.com/en-us/library/vstudio/hh156528.aspx"&gt;MSDN&lt;/a&gt;  &lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Once the &lt;code&gt;GetQrCode&lt;/code&gt; returns we set up a simple anonymous type with a QrPath property that is set to the result of &lt;code&gt;GetQrCode&lt;/code&gt; and we return our view.  &lt;/p&gt;
+
+&lt;p&gt;In the view we then have some code that determines when to show the QR image:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;@if (Model != null)
 {

@@ -9,7 +9,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="keywords" content="">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta http-equiv="last-modified" content="2013-08-25T20:54:05.9071113+01:00" />
+    <meta http-equiv="last-modified" content="2013-08-25T21:09:58.5225978+01:00" />
     <title>Jonathan Channon Blog</title>
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700%7CCourgette' rel='stylesheet' type='text/css'>
     <link href="/css/style.css" media="screen" rel="stylesheet">
@@ -145,9 +145,10 @@
     private async Task&lt;string&gt; GetQrCode()
     {
         var client = new HttpClient();
-        client.DefaultRequestHeaders.Add("X-Mashape-Authorization", "oEzDRdFudTpsuLtmgewrIGcuj08tK7PI");
+        client.DefaultRequestHeaders
+            .Add("X-Mashape-Authorization", "oEzDRdFudTpsuLtmgewrIGcuj08tK7PI");
         var response = await client.GetAsync(
-                "https://mutationevent-qr-code-generator.p.mashape.com/generate.php?content=http://www.nancyfx.org&amp;type=url");
+            "https://mutationevent-qr-code-generator.p.mashape.com/generate.php?content=http://www.nancyfx.org&amp;type=url");
 
         var stringContent = await response.Content.ReadAsStringAsync();
 
@@ -160,9 +161,19 @@
 
 <p>Here we have a GET that returns a view and then an async POST that <code>await</code>'s a <code>GetQrCode</code> method that returns a <code>Task&lt;string&gt;</code> or <code>string</code> depending on how you interpret that specific .NET 4.5 behaviour.  At this point the thread can be used to process another request whilst it waits to be notified that <code>GetQrCode</code> has finished.  </p>
 
-<p>The <code>GetQrCode</code> method uses a <code>HttpClient</code> to execute an API call to get a QR code which will link to http://www.nancyfx.org.  Our method will then return the location of the QR code image. Anything marked with <code>async</code> needs an <code>await</code> otherwise it will just execute synchronously.  In our method we execute an asynchronous call (just like our async route) to the API so we <code>await</code> it and once we do we <code>await</code> reading the response as <code>string</code> and then parse the JSON content to a dynamic type.  We return a string but the compiler will actually convert that to a <code>Task&lt;string&gt;</code> for us.  "An await expression does not block the thread on which it is executing. Instead, it causes the compiler to sign up the rest of the async method as a continuation on the awaited task. Control then returns to the caller of the async method. When the task completes, it invokes its continuation, and execution of the async method resumes where it left off."<a href="http://msdn.microsoft.com/en-us/library/vstudio/hh156528.aspx">MSDN</a>  Once the <code>GetQrCode</code> returns we set up a simple anonymous type with a QrPath property that is set to the result of <code>GetQrCode</code> and we return our view.  </p>
+<p>The <code>GetQrCode</code> method uses a <code>HttpClient</code> to execute an API call to get a QR code which will link to http://www.nancyfx.org.  Our method will then return the location of the QR code image. </p>
 
-<p>In the view we then have some code that determines when to show the resized image:</p>
+<p>Anything marked with <code>async</code> needs an <code>await</code> otherwise it will just execute synchronously.  In our method we execute an asynchronous call (just like our async route) to the API so we <code>await</code> it and once we do we <code>await</code> reading the response as <code>string</code> and then parse the JSON content to a dynamic type.  </p>
+
+<p>We return a string from the method but the compiler will actually convert that to a <code>Task&lt;string&gt;</code> for us.  </p>
+
+<blockquote>
+  <p>"An await expression does not block the thread on which it is executing. Instead, it causes the compiler to sign up the rest of the async method as a continuation on the awaited task. Control then returns to the caller of the async method. When the task completes, it invokes its continuation, and execution of the async method resumes where it left off."<a href="http://msdn.microsoft.com/en-us/library/vstudio/hh156528.aspx">MSDN</a>  </p>
+</blockquote>
+
+<p>Once the <code>GetQrCode</code> returns we set up a simple anonymous type with a QrPath property that is set to the result of <code>GetQrCode</code> and we return our view.  </p>
+
+<p>In the view we then have some code that determines when to show the QR image:</p>
 
 <pre><code>@if (Model != null)
 {
