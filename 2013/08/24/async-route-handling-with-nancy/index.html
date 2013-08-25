@@ -9,7 +9,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="keywords" content="">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta http-equiv="last-modified" content="2013-08-25T21:12:53.9216300+01:00" />
+    <meta http-equiv="last-modified" content="2013-08-25T21:37:55.6045214+01:00" />
     <title>Jonathan Channon Blog</title>
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700%7CCourgette' rel='stylesheet' type='text/css'>
     <link href="/css/style.css" media="screen" rel="stylesheet">
@@ -134,25 +134,24 @@
     {
         Get["/"] = parameters =&gt; View["Index"];
 
-        Post["/", true] = async (x, ctx) =&gt;
+        Post["/", true] = async (x, ct) =&gt;
         {
-            var link = await GetQrCode();
+            var link = await GetQrCode(ct);
             var model = new { QrPath = link };
             return View["Index", model];
         };
     }
 
-    private async Task&lt;string&gt; GetQrCode()
+    private async Task&lt;string&gt; GetQrCode(CancellationToken ct)
     {
         var client = new HttpClient();
-        client.DefaultRequestHeaders
-            .Add("X-Mashape-Authorization", "oEzDRdFudTpsuLtmgewrIGcuj08tK7PI");
+        client.DefaultRequestHeaders.Add("X-Mashape-Authorization", "oEzDRdFudTpsuLtmgewrIGcuj08tK7PI");
         var response = await client.GetAsync(
-            "https://mutationevent-qr-code-generator.p.mashape.com/generate.php?content=http://www.nancyfx.org&amp;type=url");
+                "https://mutationevent-qr-code-generator.p.mashape.com/generate.php?content=http://www.nancyfx.org&amp;type=url", ct);
 
         var stringContent = await response.Content.ReadAsStringAsync();
-
-        dynamic model = JsonObject.Parse(stringContent); 
+        ct.ThrowIfCancellationRequested();
+        dynamic model = JsonObject.Parse(stringContent);
 
         return model["image_url"];
     }

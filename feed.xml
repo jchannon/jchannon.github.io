@@ -65,25 +65,24 @@
     {
         Get["/"] = parameters =&amp;gt; View["Index"];
 
-        Post["/", true] = async (x, ctx) =&amp;gt;
+        Post["/", true] = async (x, ct) =&amp;gt;
         {
-            var link = await GetQrCode();
+            var link = await GetQrCode(ct);
             var model = new { QrPath = link };
             return View["Index", model];
         };
     }
 
-    private async Task&amp;lt;string&amp;gt; GetQrCode()
+    private async Task&amp;lt;string&amp;gt; GetQrCode(CancellationToken ct)
     {
         var client = new HttpClient();
-        client.DefaultRequestHeaders
-            .Add("X-Mashape-Authorization", "oEzDRdFudTpsuLtmgewrIGcuj08tK7PI");
+        client.DefaultRequestHeaders.Add("X-Mashape-Authorization", "oEzDRdFudTpsuLtmgewrIGcuj08tK7PI");
         var response = await client.GetAsync(
-            "https://mutationevent-qr-code-generator.p.mashape.com/generate.php?content=http://www.nancyfx.org&amp;amp;type=url");
+                "https://mutationevent-qr-code-generator.p.mashape.com/generate.php?content=http://www.nancyfx.org&amp;amp;type=url", ct);
 
         var stringContent = await response.Content.ReadAsStringAsync();
-
-        dynamic model = JsonObject.Parse(stringContent); 
+        ct.ThrowIfCancellationRequested();
+        dynamic model = JsonObject.Parse(stringContent);
 
         return model["image_url"];
     }
