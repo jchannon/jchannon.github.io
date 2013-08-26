@@ -9,7 +9,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="keywords" content="">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta http-equiv="last-modified" content="2013-08-25T21:59:19.5739602+01:00" />
+    <meta http-equiv="last-modified" content="2013-08-26T10:17:59.4064949+01:00" />
     <title>Jonathan Channon Blog</title>
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700%7CCourgette' rel='stylesheet' type='text/css'>
     <link href="/css/style.css" media="screen" rel="stylesheet">
@@ -73,7 +73,7 @@
     </div>
     <!-- <div class="post-image"><img src="images/temp/slider_1_1.jpg" alt=""></div> -->
     <div class="post-descr entry">
-        <p>I don't know about you but all I hear is "ASYNC ALL THE THINGS!", I think is partly down to its new and shiny and us developers love "the shiny" and partly a lot of the things we do in our applications are I/O based whether that be database or file system. </p>
+        <p>I don't know about you but all I hear is "ASYNC ALL THE THINGS!", I think this is partly down to its new and shiny and us developers love "the shiny" and partly a lot of the things we do in our applications are I/O based whether that be database or file system. </p>
 
 <p>The problem that comes with the new and shiny bandwagon is you need to understand what you're evangelising. Making asynchronous methods and executing them with no actual reason will not give your codebase any gains and could actually effect your application's performance.  There is more depth to that argument but for simplicity just remember this, only use asynchronous methods if you are doing some sort of I/O. </p>
 
@@ -177,7 +177,7 @@
 
 <pre><code>@if (Model != null)
 {
-    &lt;img alt="QR Code" src="[ERR!]"/&gt;
+    &lt;img alt="QR Code" src="Model.QrPath"/&gt;
 }
 </code></pre>
 

@@ -1,10 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/08/24/async-route-handling-with-nancy/</guid><link>http://blog.jonathanchannon.com/2013/08/24/async-route-handling-with-nancy/</link><title>Async Route Handling with Nancy</title><description>&lt;p&gt;I don't know about you but all I hear is "ASYNC ALL THE THINGS!", I think is partly down to its new and shiny and us developers love "the shiny" and partly a lot of the things we do in our applications are I/O based whether that be database or file system. &lt;/p&gt;
+﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/08/24/async-route-handling-with-nancy/</guid><link>http://blog.jonathanchannon.com/2013/08/24/async-route-handling-with-nancy/</link><title>Async Route Handling with Nancy</title><description>&lt;p&gt;I don't know about you but all I hear is "ASYNC ALL THE THINGS!", I think this is partly down to its new and shiny and us developers love "the shiny" and partly a lot of the things we do in our applications are I/O based whether that be database or file system. &lt;/p&gt;
 
 &lt;p&gt;The problem that comes with the new and shiny bandwagon is you need to understand what you're evangelising. Making asynchronous methods and executing them with no actual reason will not give your codebase any gains and could actually effect your application's performance.  There is more depth to that argument but for simplicity just remember this, only use asynchronous methods if you are doing some sort of I/O. &lt;/p&gt;
 
 &lt;p&gt;It could also be argued that only "use asynchronicity in a web framework if you expect high traffic in your web application". If you only have 10 requests on a small site you're not going to benefit from asynchronous execution as there are plenty of threads available to handle your application.  If you start hitting 1000 concurrent requests (the default IIS limit) then requests will start getting queued up.  If you make your routes asynchronous then any code that is being waited on, the thread that is being used there can be released to process another request thus speeding up the performance of your app and prevent the likely hood of large queues.  I will show how simple it is to make your routes asynchronous with Nancy below.&lt;/p&gt;
 
-</description><pubDate>Fri, 23 Aug 2013 23:00:00 Z</pubDate><a10:updated>2013-08-23T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I don't know about you but all I hear is "ASYNC ALL THE THINGS!", I think is partly down to its new and shiny and us developers love "the shiny" and partly a lot of the things we do in our applications are I/O based whether that be database or file system. &lt;/p&gt;
+</description><pubDate>Fri, 23 Aug 2013 23:00:00 Z</pubDate><a10:updated>2013-08-23T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I don't know about you but all I hear is "ASYNC ALL THE THINGS!", I think this is partly down to its new and shiny and us developers love "the shiny" and partly a lot of the things we do in our applications are I/O based whether that be database or file system. &lt;/p&gt;
 
 &lt;p&gt;The problem that comes with the new and shiny bandwagon is you need to understand what you're evangelising. Making asynchronous methods and executing them with no actual reason will not give your codebase any gains and could actually effect your application's performance.  There is more depth to that argument but for simplicity just remember this, only use asynchronous methods if you are doing some sort of I/O. &lt;/p&gt;
 
@@ -108,7 +108,7 @@
 
 &lt;pre&gt;&lt;code&gt;@if (Model != null)
 {
-    &amp;lt;img alt="QR Code" src="[ERR!]"/&amp;gt;
+    &amp;lt;img alt="QR Code" src="Model.QrPath"/&amp;gt;
 }
 &lt;/code&gt;&lt;/pre&gt;
 
