@@ -1,4 +1,56 @@
-﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/09/11/comparing-object-instances-with-fakeiteasy/</guid><link>http://blog.jonathanchannon.com/2013/09/11/comparing-object-instances-with-fakeiteasy/</link><title>Comparing object instances with FakeItEasy</title><description>&lt;p&gt;I had the task of writing a new application recently and of course I chose &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt;.  One of the many great reasons is the testing capabilites it offers (For more on that see &lt;a href="http://www.marcusoft.net/2013/01/NancyTesting1.html"&gt;this&lt;/a&gt; great series of articles).&lt;/p&gt;
+﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/09/12/keeping-sql-data-organised-in-integration-tests/</guid><link>http://blog.jonathanchannon.com/2013/09/12/keeping-sql-data-organised-in-integration-tests/</link><title>Keeping SQL Data Organised in Integration Tests</title><description>&lt;p&gt;In my latest project I had kept my solution tidy with my main app project, my unit test project and integration test project. I tend to stick with a naming convention such as MainApp, MainApp.Tests.Unit &amp;amp; MainApp.Tests.Integration.&lt;/p&gt;
+
+&lt;p&gt;I had begun writing my integration tests for a repository that hits the database and returns data. Currently it was one method being called in the repository.  &lt;a href="http://xunit.codeplex.com/"&gt;xUnit&lt;/a&gt; allows you to setup any test dependencies in the constructor of your test class.  It also allows you to do any tidying up in a Dispose method if you implement IDisposable although this is &lt;a href="http://xunit.codeplex.com/wikipage?title=Comparisons&amp;amp;referringTitle=Home#note2"&gt;frowned upon&lt;/a&gt;.  However I felt for my needs I would implement this.&lt;/p&gt;
+
+&lt;p&gt;I  was creating data in the database in the constructor which will get called before the test runs, retrieving data in the test, asserting and then deleting all data and resetting the auto-incrementing from the tables in the Dispose method.&lt;/p&gt;
+
+&lt;p&gt;This was working perfectly until I wanted to test another method on my repository.&lt;/p&gt;
+
+&lt;p&gt;I now needed to add data for my new method but realised if I added different data to the database in the constructor, I would be creating unnecessary data unrelated to the test.&lt;/p&gt;
+
+&lt;p&gt;My options were to move the constructor logic into separate methods and then call the methods in the test or have separate test classes per method in the repo.  Both were a not an ideal solution and quite frankly verbose, ugly and not best practice.
+</description><pubDate>Wed, 11 Sep 2013 23:00:00 Z</pubDate><a10:updated>2013-09-11T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;In my latest project I had kept my solution tidy with my main app project, my unit test project and integration test project. I tend to stick with a naming convention such as MainApp, MainApp.Tests.Unit &amp;amp; MainApp.Tests.Integration.&lt;/p&gt;
+
+&lt;p&gt;I had begun writing my integration tests for a repository that hits the database and returns data. Currently it was one method being called in the repository.  &lt;a href="http://xunit.codeplex.com/"&gt;xUnit&lt;/a&gt; allows you to setup any test dependencies in the constructor of your test class.  It also allows you to do any tidying up in a Dispose method if you implement IDisposable although this is &lt;a href="http://xunit.codeplex.com/wikipage?title=Comparisons&amp;amp;referringTitle=Home#note2"&gt;frowned upon&lt;/a&gt;.  However I felt for my needs I would implement this.&lt;/p&gt;
+
+&lt;p&gt;I  was creating data in the database in the constructor which will get called before the test runs, retrieving data in the test, asserting and then deleting all data and resetting the auto-incrementing from the tables in the Dispose method.&lt;/p&gt;
+
+&lt;p&gt;This was working perfectly until I wanted to test another method on my repository.&lt;/p&gt;
+
+&lt;p&gt;I now needed to add data for my new method but realised if I added different data to the database in the constructor, I would be creating unnecessary data unrelated to the test.&lt;/p&gt;
+
+&lt;p&gt;My options were to move the constructor logic into separate methods and then call the methods in the test or have separate test classes per method in the repo.  Both were a not an ideal solution and quite frankly verbose, ugly and not best practice.
+&lt;!--excerpt--&gt;&lt;/p&gt;
+
+&lt;h2&gt;The Solution&lt;/h2&gt;
+
+&lt;p&gt;I started playing with the attributes on my tests to see if xUnit offered me something and was chuffed to find the &lt;code&gt;BeforeAfterTestAttribute&lt;/code&gt;.  This does exactly what it says on the tin.  Its an abstract class that you inherit from for your own implementation and overide the &lt;code&gt;Before&lt;/code&gt; and &lt;code&gt;After&lt;/code&gt; methods;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class RepoMethod1BeforeAfter : BeforeAfterTestAttribute
+{
+    public override void After(MethodInfo methodUnderTest)
+    {
+      //Insert data into tables
+    }
+
+    public override void Before(MethodInfo methodUnderTest)
+    {
+      //Drop data from tables
+    }
+}
+
+[Fact]
+[RepoMethod1BeforeAfter]
+public void RepoMethod1_Should_be_Awesome()
+{
+  //Check it's awesome
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can then put an attribute on the relevant tests that need to have specific data inserted/deleted and it keeps the design of your test class follow best practices as well as not implementing IDisposable.&lt;/p&gt;
+
+&lt;p&gt;The only thing I can spot as a slight issue is remembering to put the attribute on your tests but I think that'll be quite obvious when your tests start failing!&lt;/p&gt;
+</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/09/11/comparing-object-instances-with-fakeiteasy/</guid><link>http://blog.jonathanchannon.com/2013/09/11/comparing-object-instances-with-fakeiteasy/</link><title>Comparing object instances with FakeItEasy</title><description>&lt;p&gt;I had the task of writing a new application recently and of course I chose &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt;.  One of the many great reasons is the testing capabilites it offers (For more on that see &lt;a href="http://www.marcusoft.net/2013/01/NancyTesting1.html"&gt;this&lt;/a&gt; great series of articles).&lt;/p&gt;
 
 &lt;p&gt;The basics of a test with Nancy looks like this:&lt;/p&gt;
 
@@ -794,35 +846,4 @@ This Markdown Viewengine allows views to be written in Markdown.
 &lt;p&gt;If you have an existing application you need to make sure the server side logic regarding date storage converts to UTC and that your view layer converts to local time.&lt;/p&gt;
 
 &lt;p&gt;Its risky but if your users are all on the same time zone and the database server and all operating systems are the same you don’t need to worry about this and can use DateTime.Now for everything.  &lt;/p&gt;
-</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/04/02/the-old-development-language-switcheroo/</guid><link>http://blog.jonathanchannon.com/2013/04/02/the-old-development-language-switcheroo/</link><title>The Old Development Language Switcheroo</title><description>&lt;p&gt;As a C# developer I think I’m pretty safe in saying that its not going away any time soon however, its my opinion that to not become irrelevant you need to have options. Some may argue that its better to be master of one than a Jack of all trades but lets just say you can’t find your next job in the primary language you want to work in. What do you do?&lt;/p&gt;
-
-&lt;p&gt;I have looked more into JavaScript recently and with that comes server and client scope for the use of the language so with some understanding of JS that would be probably the best bet for me however, as much as this may annoy some I think I actually prefer statically typed languages.&lt;/p&gt;
-
-&lt;p&gt;Now I know there is &lt;a href="http://www.typescriptlang.org/"&gt;TypeScript&lt;/a&gt; that I could use for my &lt;a href="http://nodejs.org/"&gt;node.js&lt;/a&gt; apps but I see that as more of a workaround and not a core feature of JavaScript. I’m not saying anything bad against JS and the libraries/frameworks that I have used I like but I just find it easier to learn and know what I can do when I have decent intellisense showing me what I can do with my code.&lt;/p&gt;
-
-</description><pubDate>Mon, 01 Apr 2013 23:00:00 Z</pubDate><a10:updated>2013-04-01T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;As a C# developer I think I’m pretty safe in saying that its not going away any time soon however, its my opinion that to not become irrelevant you need to have options. Some may argue that its better to be master of one than a Jack of all trades but lets just say you can’t find your next job in the primary language you want to work in. What do you do?&lt;/p&gt;
-
-&lt;p&gt;I have looked more into JavaScript recently and with that comes server and client scope for the use of the language so with some understanding of JS that would be probably the best bet for me however, as much as this may annoy some I think I actually prefer statically typed languages.&lt;/p&gt;
-
-&lt;p&gt;Now I know there is &lt;a href="http://www.typescriptlang.org/"&gt;TypeScript&lt;/a&gt; that I could use for my &lt;a href="http://nodejs.org/"&gt;node.js&lt;/a&gt; apps but I see that as more of a workaround and not a core feature of JavaScript. I’m not saying anything bad against JS and the libraries/frameworks that I have used I like but I just find it easier to learn and know what I can do when I have decent intellisense showing me what I can do with my code.&lt;/p&gt;
-
-&lt;!--excerpt--&gt;
-
-&lt;p&gt;You could argue that I could go back to my first language of Delphi or I could look into C++, Java or PHP but my counter argument might just be laughter. In my opinion these are old languages. They may be reliable for some needs but I feel its looking back to the past somewhat and not looking forward.&lt;/p&gt;
-
-&lt;p&gt;I have recently come across &lt;a href="http://www.dartlang.org/"&gt;Dart&lt;/a&gt; and want to spend some time looking into it to see if we suit each other.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Dart is a class-based, object-oriented language with lexical scoping, closures, and optional static typing. Dart helps you build structured modern web apps and is easy to learn for a wide range of developers.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;There is also &lt;a href="http://www.tryfsharp.org/"&gt;F#&lt;/a&gt; which I need to look at as my Twitter timeline has more and more references to this language.&lt;/p&gt;
-
-&lt;p&gt;There is also &lt;a href="http://kotlin.jetbrains.org/"&gt;Kotlin&lt;/a&gt; but that’s as much as I know about it, the name. I think its based on Java and that rings alarm bells for me but I’m sure &lt;a href="http://twitter.com/Cranialstrain"&gt;@Cranialstrain&lt;/a&gt; will put me right.&lt;/p&gt;
-
-&lt;p&gt;There is also &lt;a href="http://golang.org/"&gt;Go&lt;/a&gt; and I’m sure there are many others that I could find but rightly or wrongly when deciding upon a language which lets be honest is a big investment you need to know there are the available jobs out there in that language. Its nice to learn new stuff and I highly recommend it but for me a whole new investment in a language has to warrant some pay offs such as employment.&lt;/p&gt;
-
-&lt;p&gt;I can’t say for sure what language I’d use if I had to change, at present most likely JavaScript but probably that is based out of limited options on my part, maybe I need to become a better polyglot programmer and learn some more languages to have better “options” and not become irrelevant.&lt;/p&gt;
-
-&lt;p&gt;Let me know what your primary language is and what you’d jump to if you had to.&lt;/p&gt;
 </a10:content></item></channel></rss>
