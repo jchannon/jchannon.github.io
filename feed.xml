@@ -1,4 +1,144 @@
-﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/08/24/async-route-handling-with-nancy/</guid><link>http://blog.jonathanchannon.com/2013/08/24/async-route-handling-with-nancy/</link><title>Async Route Handling with Nancy</title><description>&lt;p&gt;I don't know about you but all I hear is "ASYNC ALL THE THINGS!", I think this is partly down to its new and shiny and us developers love "the shiny" and partly a lot of the things we do in our applications are I/O based whether that be database or file system. &lt;/p&gt;
+﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/09/11/comparing-object-instances-with-fakeiteasy/</guid><link>http://blog.jonathanchannon.com/2013/09/11/comparing-object-instances-with-fakeiteasy/</link><title>Comparing object instances with FakeItEasy</title><description>&lt;p&gt;I had the task of writing a new application recently and of course I chose &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt;.  One of the many great reasons is the testing capabilites it offers (For more on that see &lt;a href="http://www.marcusoft.net/2013/01/NancyTesting1.html"&gt;this&lt;/a&gt; great series of articles).&lt;/p&gt;
+
+&lt;p&gt;The basics of a test with Nancy looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[Fact]
+public void Should_return_status_ok_when_route_exists()
+{
+    // Given
+    var bootstrapper = new DefaultNancyBootstrapper();
+    var browser = new Browser(bootstrapper);
+
+    // When
+    var result = browser.Get("/", with =&amp;gt; {
+        with.HttpRequest();
+    });
+
+    // Then
+    Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You set up a bootstrapper, this can be your live one or an inherited version of your live one with dependencies changed to mocks for example or use the &lt;code&gt;ConfigurableBootstrapper&lt;/code&gt;.&lt;/p&gt;
+
+</description><pubDate>Tue, 10 Sep 2013 23:00:00 Z</pubDate><a10:updated>2013-09-10T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I had the task of writing a new application recently and of course I chose &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt;.  One of the many great reasons is the testing capabilites it offers (For more on that see &lt;a href="http://www.marcusoft.net/2013/01/NancyTesting1.html"&gt;this&lt;/a&gt; great series of articles).&lt;/p&gt;
+
+&lt;p&gt;The basics of a test with Nancy looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[Fact]
+public void Should_return_status_ok_when_route_exists()
+{
+    // Given
+    var bootstrapper = new DefaultNancyBootstrapper();
+    var browser = new Browser(bootstrapper);
+
+    // When
+    var result = browser.Get("/", with =&amp;gt; {
+        with.HttpRequest();
+    });
+
+    // Then
+    Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You set up a bootstrapper, this can be your live one or an inherited version of your live one with dependencies changed to mocks for example or use the &lt;code&gt;ConfigurableBootstrapper&lt;/code&gt;.&lt;/p&gt;
+
+&lt;!--excerpt--&gt;
+
+&lt;p&gt;In my scenario I was testing that when a route got called something on an interface was called with an instance of an object.&lt;/p&gt;
+
+&lt;p&gt;I had the object available in the test, I passed it to my fake interface and asserted that the call happened.&lt;/p&gt;
+
+&lt;p&gt;Here's an example of what the route and test might look like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class ApiModule : NancyModule
+{
+    public ApiModule(IScheduleRepository scheduleRepository)
+        : base("/api/schedules")
+    {
+        Post["/"] = parameters =&amp;gt;
+        {
+            var result = this.BindAndValidate&amp;lt;Schedule&amp;gt;();
+
+            if (!ModelValidationResult.IsValid)
+            {
+                return HttpStatusCode.UnprocessableEntity;
+            }
+
+            var conflict = scheduleRepository.CheckForConflict(result);
+
+            return HttpStatusCode.Created;
+        };
+    }
+}
+
+[Fact]
+public void Creating_Schedule_Entry_Should_Check_For_Conflicts()
+{
+    //Given
+    var fakeScheduleRepository = A.Fake&amp;lt;IScheduleRepository&amp;gt;();
+    var model = GetModel();
+
+    var browser = new Browser(GetBootstrapper(scheduleRepository:fakeScheduleRepository));
+
+    //When
+    var result = browser.Post("/api/schedules", with =&amp;gt;
+    {
+        with.HttpRequest();
+        with.JsonBody(model);
+    });
+
+    //Then
+    A.CallTo(() =&amp;gt; fakeScheduleRepository.CheckForConflict(model)).MustHaveHappened();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The test is using &lt;a href="http://xunit.codeplex.com/"&gt;xUnit&lt;/a&gt; and &lt;a href="https://github.com/FakeItEasy/FakeItEasy"&gt;FakeItEasy&lt;/a&gt; for creating fakes/mocks or whatever you choose to call them and the test will pass if the call to &lt;code&gt;fakeScheduleRepository.CheckForConflict&lt;/code&gt; was called with the model object.&lt;/p&gt;
+
+&lt;h2&gt;The test fails!&lt;/h2&gt;
+
+&lt;p&gt;The reason for the test failing is because...? That's right, the object that is passed into the call on IScheduleRepository in the route is different to the one in the test.&lt;/p&gt;
+
+&lt;p&gt;We could override Equals on our model object but that's not a great approach, we could hope that if we create an &lt;code&gt;IEqualityComparer&amp;lt;Schedule&amp;gt;&lt;/code&gt; we could pass that in somewhere but from what I've seen that's not possible so how do we get our test to pass?&lt;/p&gt;
+
+&lt;p&gt;FakeItEasy has a nice fluent API that allows you to do the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[Fact]
+public void Creating_Schedule_Entry_Should_Check_For_Conflicts()
+{
+    //Given
+    var fakeScheduleRepository = A.Fake&amp;lt;IScheduleRepository&amp;gt;();
+    var model = GetModel();
+
+    var browser = new Browser(GetBootstrapper(scheduleRepository:fakeScheduleRepository));
+
+    //When
+    var result = browser.Post("/api/schedules", with =&amp;gt;
+    {
+        with.HttpRequest();
+        with.JsonBody(model);
+    });
+
+    //Then
+    A.CallTo(() =&amp;gt; fakeScheduleRepository.CheckForConflict(A&amp;lt;Schedule&amp;gt;.That.Matches(x =&amp;gt; BodyModel(x)))).MustHaveHappened();
+}
+
+private bool BodyModel(CreateKeywordSchedule match)
+{
+    return match.DateFrom == new DateTime(2013, 01, 01, 12, 00, 00) &amp;amp;&amp;amp;
+           match.DateTo == new DateTime(2013, 01, 02, 12, 00, 00);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Spot the difference? So instead of passing our original model object in we told FakeItEasy to expect a type of Schedule that matches an an object that is of type Schedule.  We wrote a &lt;code&gt;Func&amp;lt;Schedule,bool&amp;gt;&lt;/code&gt; to determine what a match is when comparing objects.&lt;/p&gt;
+
+&lt;p&gt;So when the test runs and &lt;code&gt;fakeScheduleRepository.CheckForConflict(model)&lt;/code&gt; is executed FakeItEasy will assert that the argument passed into &lt;code&gt;fakeScheduleRepository.CheckForConflict()&lt;/code&gt; matches the property values we decided to match on in our BodyModel method.  &lt;/p&gt;
+
+&lt;p&gt;This way if the model we send into the route has the property values that match those we have defined in BodyModel we can pass our test.&lt;/p&gt;
+
+&lt;p&gt;Its a much neater way without having to write &lt;code&gt;IEqualityComparer&lt;/code&gt; or anything over the top and hope you found this useful.&lt;/p&gt;
+</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/08/24/async-route-handling-with-nancy/</guid><link>http://blog.jonathanchannon.com/2013/08/24/async-route-handling-with-nancy/</link><title>Async Route Handling with Nancy</title><description>&lt;p&gt;I don't know about you but all I hear is "ASYNC ALL THE THINGS!", I think this is partly down to its new and shiny and us developers love "the shiny" and partly a lot of the things we do in our applications are I/O based whether that be database or file system. &lt;/p&gt;
 
 &lt;p&gt;The problem that comes with the new and shiny bandwagon is you need to understand what you're evangelising. Making asynchronous methods and executing them with no actual reason will not give your codebase any gains and could actually effect your application's performance.  There is more depth to that argument but for simplicity just remember this, only use asynchronous methods if you are doing some sort of I/O. &lt;/p&gt;
 
@@ -685,148 +825,4 @@ This Markdown Viewengine allows views to be written in Markdown.
 &lt;p&gt;I can’t say for sure what language I’d use if I had to change, at present most likely JavaScript but probably that is based out of limited options on my part, maybe I need to become a better polyglot programmer and learn some more languages to have better “options” and not become irrelevant.&lt;/p&gt;
 
 &lt;p&gt;Let me know what your primary language is and what you’d jump to if you had to.&lt;/p&gt;
-</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/03/04/the-many-approaches-to-entity-framework/</guid><link>http://blog.jonathanchannon.com/2013/03/04/the-many-approaches-to-entity-framework/</link><title>The many approaches to Entity Framework</title><description>&lt;p&gt;I recently had a need to look into using &lt;a href="http://www.asp.net/entity-framework"&gt;Entity Framework (EF)&lt;/a&gt; for a &lt;a href="http://www.asp.net/mvc"&gt;ASP.NET MVC&lt;/a&gt; project. In the past I have always used &lt;a href="http://www.toptensoftware.com/petapoco/"&gt;PetaPoco&lt;/a&gt; as my ORM of choice and with hearing nothing but bad things about EF I was a little sceptical. There are various ways to use EF, Code First being one of them and the easiest from what I can gather and luckily the approach I needed to get up to speed on. This means you can define your model in code and EF will turn that into tables in your database.&lt;/p&gt;
-
-&lt;p&gt;The way I was going to see how EF could be architected in an application was to create a MVC application that provided CRUD capabilities for Customers, Orders and Products. Nothing complicated but something enough to see how EF could be fitted in with a MVC application. I would also like to use a unit of work pattern such as instantiate a model class, set some properties and call a save method. I would also like to keep the architecture well enough abstracted so that another ORM could take its place easily enough if needs be.&lt;/p&gt;
-
-&lt;p&gt;I will list the various approaches I took investigating the how EF could be integrated. They are not in any chronological order.&lt;/p&gt;
-
-</description><pubDate>Mon, 04 Mar 2013 00:00:00 Z</pubDate><a10:updated>2013-03-04T00:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I recently had a need to look into using &lt;a href="http://www.asp.net/entity-framework"&gt;Entity Framework (EF)&lt;/a&gt; for a &lt;a href="http://www.asp.net/mvc"&gt;ASP.NET MVC&lt;/a&gt; project. In the past I have always used &lt;a href="http://www.toptensoftware.com/petapoco/"&gt;PetaPoco&lt;/a&gt; as my ORM of choice and with hearing nothing but bad things about EF I was a little sceptical. There are various ways to use EF, Code First being one of them and the easiest from what I can gather and luckily the approach I needed to get up to speed on. This means you can define your model in code and EF will turn that into tables in your database.&lt;/p&gt;
-
-&lt;p&gt;The way I was going to see how EF could be architected in an application was to create a MVC application that provided CRUD capabilities for Customers, Orders and Products. Nothing complicated but something enough to see how EF could be fitted in with a MVC application. I would also like to use a unit of work pattern such as instantiate a model class, set some properties and call a save method. I would also like to keep the architecture well enough abstracted so that another ORM could take its place easily enough if needs be.&lt;/p&gt;
-
-&lt;p&gt;I will list the various approaches I took investigating the how EF could be integrated. They are not in any chronological order.&lt;/p&gt;
-
-&lt;!--excerpt--&gt;
-
-&lt;h2&gt;Approach One&lt;/h2&gt;
-
-&lt;p&gt;My first approach was to create a generic repository, IRepository, to handle the the various crud methods needed and also a Save method. The implementation, Repository would take a IUnitOfWork constructor dependency which would expose the model type ie.Customer,Order, Product and allow EF to perform the CRUD actions.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class Repository : IRepository where T : class
-{
-    private readonly IUnitOfWork unitOfWork;
-    private readonly DbSet entitySet;
-
-    public Repository(IUnitOfWork unitOfWork)
-    {
-        this.unitOfWork = unitOfWork;
-        entitySet = unitOfWork.GetEntitySet();
-    }
-
-    public void Add(T entity)
-    {
-        entitySet.Add(entity);        
-    }
-}
-
-public interface IUnitOfWork
-{
-    void SaveChanges();
-    DbSet GetEntitySet() where TEntity : class;
-}
-
-public OrderController(IRepository orderRepository, IRepository customerRepository )
-{
-    this.orderRepository = orderRepository;
-    this.customerRepository = customerRepository;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;There are two issues with this approach. Firstly, the IUnitOfWork exposes EF specific members which I don’t really want and secondly when a repository calls Save it will in turn call the SaveChanges method on EF which will save any changes across all repositories. This is because we have one EF database context per request as handled by our IOC container. To get around the saving issue we could have a new context per instance of the repository but I don’t think that is a good approach.&lt;/p&gt;
-
-&lt;p&gt;The full code can be seen on the master branch at Github – &lt;a href="https://github.com/jchannon/EntityFrameworkMVC/tree/master/EntityFrameworkMVC"&gt;https://github.com/jchannon/EntityFrameworkMVC/tree/master/EntityFrameworkMVC
-&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2&gt;Approach Two&lt;/h2&gt;
-
-&lt;p&gt;Another approach we could use is to remove IUnitOfWork altogether, keep the Save method on the repository but inject the context into the repository and still inject the repositories into the controllers.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class Repository : IRepository where T : class
-{
-    private readonly EntityFrameworkMvcDbContext context;
-    private readonly DbSet entitySet;
-
-    public Repository(EntityFrameworkMvcDbContext context)
-    {
-        this.context = context;
-        entitySet = context.Set();
-    }
-
-    public void Add(T entity)
-    {
-        entitySet.Add(entity);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This approach is pretty close to what I think we would want and reasonably straight forward but I still don’t like the fact that the SaveChanges would effect every modified/added model across all repositories. If you’re happy to live with that then I think you’re good to go.&lt;/p&gt;
-
-&lt;p&gt;The full code can be seen on the LessAbstraction branch at Github – &lt;a href="https://github.com/jchannon/EntityFrameworkMVC/tree/LessAbstraction/EntityFrameworkMVC"&gt;https://github.com/jchannon/EntityFrameworkMVC/tree/LessAbstraction/EntityFrameworkMVC
-&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2&gt;Approach Three&lt;/h2&gt;
-
-&lt;p&gt;Another approach for using EF and building on from approach one was to remove the GetEntitySet from the IUnitOfWork interface but keep the Save method, inject the context into the repositories to allow them to add/update and inject the IUnitOfWork and repositories into the controllers so the repositories could use Add and then IUnitOfWork could be used to call SaveChanges.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public interface IUnitOfWork
-{
-    void SaveChanges();
-}
-
-public class Repository : IRepository where T : class
-{
-    private readonly DbSet entitySet;
-
-    public Repository(EntityFrameworkMvcDbContext context)
-    {
-        entitySet = context.Set();
-    }
-
-    public void Add(T entity)
-    {
-        entitySet.Add(entity);  
-    }
-}
-
-public OrderController(IUnitOfWork unitOfWork, IRepository orderRepository, IRepository customerRepository)
-{
-    this.unitOfWork = unitOfWork;
-    this.orderRepository = orderRepository;
-    this.customerRepository = customerRepository;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I think that’s a decent approach however, I think it could be tidied up so that the controllers don’t get cluttered with too many constructor dependencies.&lt;/p&gt;
-
-&lt;p&gt;The full code can be seen on the GenericContextPerRequest branch at Github – &lt;a href="https://github.com/jchannon/EntityFrameworkMVC/tree/GenericContextPerRequest/EntityFrameworkMVC"&gt;https://github.com/jchannon/EntityFrameworkMVC/tree/GenericContextPerRequest/EntityFrameworkMVC
-&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2&gt;Approach Four&lt;/h2&gt;
-
-&lt;p&gt;This below was another approach and the approach I decided I would use. It uses all the understandings gained from the above samples and hopes to provide a decent way of using EF.&lt;/p&gt;
-
-&lt;p&gt;The repositories are now exposed on the IUnitOfWork interface, the implementation takes the DBContext as a constructor dependency, the repository implementation also takes the DBContext to provide the CRUD features with EF and the controllers only have the IUnitOfWork injected into them.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public interface IUnitOfWork
-{
-    void SaveChanges();
-    IRepository CustomerRepository { get; }
-    IRepository ProductRepository { get; }
-    IRepository OrderRepository { get; }
-}
-
-public OrderController(IUnitOfWork unitOfWork )
-{
-    this.unitOfWork = unitOfWork;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This means we can keep our one database context per request, the controllers are tidied up so we no longer have numerous constructor dependencies and the repositories can be used to do CRUD and then SaveChanges can be called by IUnitOfWork when we have finished with the repositories.&lt;/p&gt;
-
-&lt;p&gt;The only possible downside could be in time that we have numerous constructor dependencies on the IUnitOfWork implementation as well as numerous exposed repository properties on the IUnitOfWork interface. I don’t see this as a big issue as its only one class in your solution. If you didn’t want this to get too polluted you could create a repository factory and inject that into the controller and just have the SaveChanges on the IUnitOfWork interface. You wouldn’t want the IUnitOfWork to expose the repositories because as &lt;a href="https://twitter.com/daanleduc"&gt;@daanleduc&lt;/a&gt; pointed out to me that would violate the SRP.&lt;/p&gt;
-
-&lt;h2&gt;Conclusion&lt;/h2&gt;
-
-&lt;p&gt;I only touched the basics of implementing EF into a MVC app but these approaches did take quite a while to discover and after hearing all the negativity towards EF and drawing from my experience I think I could see why people have issues with it in a much larger application as I’m sure there are other caveats to using EF. The biggest issue I saw with it was not exposing a Save method for the model type you were using, instead you have to commit all changes across the database context. I feel this made it quite difficult to create a decent architecture. I can see in a large enterprise application why EF could be helpful in allowing it to query the database for you and create/modify the tables for you based on your model changes but I think for now in smaller applications I think I still prefer micro-ORMs like PetaPoco, Dapper or Simple.Data due to the control it gives you and also the ease in which you can abstract the database communication. As &lt;a href="https://twitter.com/Cranialstrain"&gt;@Cranialstrain&lt;/a&gt; says “the database is an implementation detail”. I’d also like to thank all those on Jabbr that helped me with the above approaches and long discussions had about Entity Framework!&lt;/p&gt;
 </a10:content></item></channel></rss>
