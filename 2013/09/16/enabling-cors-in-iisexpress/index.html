@@ -61,15 +61,67 @@
             <div class="">
                   
 
-    <h1><a href="/category/">Other posts in the "webstorm" category</a></h1>
-  
-      <div class="catboxed" style="position:relative; margin-bottom:20px;">
-        <span class="cat-label"></span>
-        <a href="/2013/04/17/up-running-with-typescript-and-webstorm/" title="Up & Running with TypeScript and WebStorm">Up &amp; Running with TypeScript and WebStorm</a> <small>(April 17, 2013)</small>
-      </div>
-  
-  
+<div class="post-item boxed post-detail">
+    <span class="post-label label-quotes"></span>           
+    <div class="post-title">
+      <h1><a href="/2013/09/16/enabling-cors-in-iisexpress/">Enabling CORS in IISExpress</a></h1>
+    </div>
+    <div class="post-meta-top">
+        <span class="post-date">September 16, 2013</span> <!-- <span class="post-author">Jonathan Channon</span> -->
+        <!-- <span class="link-comments">20 comments</span> -->
+        <div class="commentcount" data-disqus-url="http://blog.jonathanchannon.com/2013/09/16/enabling-cors-in-iisexpress/"></div>
+    </div>
+    <!-- <div class="post-image"><img src="images/temp/slider_1_1.jpg" alt=""></div> -->
+    <div class="post-descr entry">
+        <p>I was playing around with <a href="https://github.com/wordnik/swagger-ui">swagger-ui</a> and was trying to point it to a local endpoint that I started with IIS Express.  I was getting an error saying that it needed the endpoint to accept Access-Control-Allow-Origin requests.</p>
 
+<p>I went Googling and it couldn't find anything specific to IIS Express but managed to use some guidance for full blown IIS.</p>
+
+<p>The solution is to go to <code>C:\Program Files (x86)\IIS Express\AppServer</code> and open the <code>applicationhost.config</code> file.</p>
+
+<p>Search for <code>httpProtocol</code> and you should see this:</p>
+
+<pre><code>&lt;httpProtocol&gt;
+    &lt;customHeaders&gt;
+        &lt;clear /&gt;
+        &lt;add name="X-Powered-By" value="ASP.NET" /&gt;
+    &lt;/customHeaders&gt;
+    &lt;redirectHeaders&gt;
+        &lt;clear /&gt;
+    &lt;/redirectHeaders&gt;
+&lt;/httpProtocol&gt;
+</code></pre>
+
+<p>Now add this to the <code>customHeaders</code> node:</p>
+
+<pre><code>&lt;add name="Access-Control-Allow-Origin" value="*" /&gt;
+&lt;add name="Access-Control-Allow-Headers" value="Content-Type" /&gt;
+</code></pre>
+
+<p>Just bear in mind this opens up your webserver so you may need to find something alternative for a live production environment.</p>
+
+<p>Anyway you should now be able to start accepting requests via CORS when you fire up IISExpress</p>
+
+    </div> 
+    <div id="tagcloud">
+     <a href="/category/integration-testing"><span>integration testing</span></a>
+     <a href="/category/.net"><span>.net</span></a>
+     <a href="/category/iis-express"><span>iis express</span></a>
+    </div>
+    <div id="disqus_thread"></div>
+<script>
+    var disqus_shortname = 'jonathanchannonblog';
+    var disqus_url = 'http://blog.jonathanchannon.com/2013/09/16/enabling-cors-in-iisexpress/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
             </div>
                 <!-- #content -->
          </div>

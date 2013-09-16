@@ -1,4 +1,60 @@
-﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/09/12/keeping-sql-data-organised-in-integration-tests/</guid><link>http://blog.jonathanchannon.com/2013/09/12/keeping-sql-data-organised-in-integration-tests/</link><title>Keeping SQL Data Organised in Integration Tests</title><description>&lt;p&gt;In my latest project I had kept my solution tidy with my main app project, my unit test project and integration test project. I tend to stick with a naming convention such as MainApp, MainApp.Tests.Unit &amp;amp; MainApp.Tests.Integration.&lt;/p&gt;
+﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/09/16/enabling-cors-in-iisexpress/</guid><link>http://blog.jonathanchannon.com/2013/09/16/enabling-cors-in-iisexpress/</link><title>Enabling CORS in IISExpress</title><description>&lt;p&gt;I was playing around with &lt;a href="https://github.com/wordnik/swagger-ui"&gt;swagger-ui&lt;/a&gt; and was trying to point it to a local endpoint that I started with IIS Express.  I was getting an error saying that it needed the endpoint to accept Access-Control-Allow-Origin requests.&lt;/p&gt;
+
+&lt;p&gt;I went Googling and it couldn't find anything specific to IIS Express but managed to use some guidance for full blown IIS.&lt;/p&gt;
+
+&lt;p&gt;The solution is to go to &lt;code&gt;C:\Program Files (x86)\IIS Express\AppServer&lt;/code&gt; and open the &lt;code&gt;applicationhost.config&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;p&gt;Search for &lt;code&gt;httpProtocol&lt;/code&gt; and you should see this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;httpProtocol&amp;gt;
+    &amp;lt;customHeaders&amp;gt;
+        &amp;lt;clear /&amp;gt;
+        &amp;lt;add name="X-Powered-By" value="ASP.NET" /&amp;gt;
+    &amp;lt;/customHeaders&amp;gt;
+    &amp;lt;redirectHeaders&amp;gt;
+        &amp;lt;clear /&amp;gt;
+    &amp;lt;/redirectHeaders&amp;gt;
+&amp;lt;/httpProtocol&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now add this to the &lt;code&gt;customHeaders&lt;/code&gt; node:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;add name="Access-Control-Allow-Origin" value="*" /&amp;gt;
+&amp;lt;add name="Access-Control-Allow-Headers" value="Content-Type" /&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Just bear in mind this opens up your webserver so you may need to find something alternative for a live production environment.&lt;/p&gt;
+
+&lt;p&gt;Anyway you should now be able to start accepting requests via CORS when you fire up IISExpress&lt;/p&gt;
+</description><pubDate>Sun, 15 Sep 2013 23:00:00 Z</pubDate><a10:updated>2013-09-15T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I was playing around with &lt;a href="https://github.com/wordnik/swagger-ui"&gt;swagger-ui&lt;/a&gt; and was trying to point it to a local endpoint that I started with IIS Express.  I was getting an error saying that it needed the endpoint to accept Access-Control-Allow-Origin requests.&lt;/p&gt;
+
+&lt;p&gt;I went Googling and it couldn't find anything specific to IIS Express but managed to use some guidance for full blown IIS.&lt;/p&gt;
+
+&lt;p&gt;The solution is to go to &lt;code&gt;C:\Program Files (x86)\IIS Express\AppServer&lt;/code&gt; and open the &lt;code&gt;applicationhost.config&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;p&gt;Search for &lt;code&gt;httpProtocol&lt;/code&gt; and you should see this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;httpProtocol&amp;gt;
+    &amp;lt;customHeaders&amp;gt;
+        &amp;lt;clear /&amp;gt;
+        &amp;lt;add name="X-Powered-By" value="ASP.NET" /&amp;gt;
+    &amp;lt;/customHeaders&amp;gt;
+    &amp;lt;redirectHeaders&amp;gt;
+        &amp;lt;clear /&amp;gt;
+    &amp;lt;/redirectHeaders&amp;gt;
+&amp;lt;/httpProtocol&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now add this to the &lt;code&gt;customHeaders&lt;/code&gt; node:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;add name="Access-Control-Allow-Origin" value="*" /&amp;gt;
+&amp;lt;add name="Access-Control-Allow-Headers" value="Content-Type" /&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Just bear in mind this opens up your webserver so you may need to find something alternative for a live production environment.&lt;/p&gt;
+
+&lt;p&gt;Anyway you should now be able to start accepting requests via CORS when you fire up IISExpress&lt;/p&gt;
+</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/09/12/keeping-sql-data-organised-in-integration-tests/</guid><link>http://blog.jonathanchannon.com/2013/09/12/keeping-sql-data-organised-in-integration-tests/</link><title>Keeping SQL Data Organised in Integration Tests</title><description>&lt;p&gt;In my latest project I had kept my solution tidy with my main app project, my unit test project and integration test project. I tend to stick with a naming convention such as MainApp, MainApp.Tests.Unit &amp;amp; MainApp.Tests.Integration.&lt;/p&gt;
 
 &lt;p&gt;I had begun writing my integration tests for a repository that hits the database and returns data. Currently it was one method being called in the repository.  &lt;a href="http://xunit.codeplex.com/"&gt;xUnit&lt;/a&gt; allows you to setup any test dependencies in the constructor of your test class.  It also allows you to do any tidying up in a Dispose method if you implement IDisposable although this is &lt;a href="http://xunit.codeplex.com/wikipage?title=Comparisons&amp;amp;referringTitle=Home#note2"&gt;frowned upon&lt;/a&gt;.  However I felt for my needs I would implement this.&lt;/p&gt;
 
@@ -821,29 +877,4 @@ This Markdown Viewengine allows views to be written in Markdown.
 &lt;p&gt;Overall it’s another nice feature that Nancy can offer its users and I have enjoyed contributing to the OSS project and tinkering with code!&lt;/p&gt;
 
 &lt;p&gt;The Markdown View Engine and Demo will be released in 0.17 of Nancy due very soon!&lt;/p&gt;
-</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/04/08/using-datetime-in-c-and-sql/</guid><link>http://blog.jonathanchannon.com/2013/04/08/using-datetime-in-c-and-sql/</link><title>Using DateTime in C# and SQL</title><description>&lt;p&gt;I’m sure there are millions of blog posts out there that already discuss this but I think its worth noting down even if its just something for me to remember.&lt;/p&gt;
-
-&lt;p&gt;Store your datetimes in UTC format into the database. Unfortunately this mean executing something like:
-&lt;code&gt;myObject.ExpiryDate = TimeZoneInfo.ConvertTimeToUtc(dateTime, TimeZoneInfo.FindSystemTimeZoneById(“timezoneid of users”)&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;In every central place where you update/insert DateTime values on your objects you will need the above.&lt;/p&gt;
-
-&lt;p&gt;When you display any DateTime information it must display as a local datetime value. You can do this by using     &lt;code&gt;myObject.ExpiryDate.ToLocalTime()&lt;/code&gt;&lt;/p&gt;
-
-</description><pubDate>Sun, 07 Apr 2013 23:00:00 Z</pubDate><a10:updated>2013-04-07T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I’m sure there are millions of blog posts out there that already discuss this but I think its worth noting down even if its just something for me to remember.&lt;/p&gt;
-
-&lt;p&gt;Store your datetimes in UTC format into the database. Unfortunately this mean executing something like:
-&lt;code&gt;myObject.ExpiryDate = TimeZoneInfo.ConvertTimeToUtc(dateTime, TimeZoneInfo.FindSystemTimeZoneById(“timezoneid of users”)&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;In every central place where you update/insert DateTime values on your objects you will need the above.&lt;/p&gt;
-
-&lt;p&gt;When you display any DateTime information it must display as a local datetime value. You can do this by using     &lt;code&gt;myObject.ExpiryDate.ToLocalTime()&lt;/code&gt;&lt;/p&gt;
-
-&lt;!--excerpt--&gt;
-
-&lt;p&gt;An example of this is if you stored a DateTime that was converted to UTC and it stored April 8th 14:30 2013, when a user in USA was given the date in their web application they would see it as April 8th 10:30 but UK users would read it as April 8th 15:30&lt;/p&gt;
-
-&lt;p&gt;If you have an existing application you need to make sure the server side logic regarding date storage converts to UTC and that your view layer converts to local time.&lt;/p&gt;
-
-&lt;p&gt;Its risky but if your users are all on the same time zone and the database server and all operating systems are the same you don’t need to worry about this and can use DateTime.Now for everything.  &lt;/p&gt;
 </a10:content></item></channel></rss>
