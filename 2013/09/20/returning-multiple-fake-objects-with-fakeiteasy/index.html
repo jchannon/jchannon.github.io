@@ -13,7 +13,7 @@
     <meta http-equiv="last-modified" content="2013-09-20T12:43:48.8161201+01:00" />
     <meta name="google-site-verification" content="9bvoj2jXRyykef2Tg72C0Am15YBTqDF0RgeZ84tUytE" />
         <title>
-    Jonathan Channon Blog - A quick look at Visual Node
+    Jonathan Channon Blog - Returning multiple fake objects with FakeItEasy
 </title>
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700%7CCourgette' rel='stylesheet' type='text/css'>
     <link href="/css/style.css" media="screen" rel="stylesheet">
@@ -69,81 +69,113 @@
 <div class="post-item boxed post-detail">
     <span class="post-label label-quotes"></span>           
     <div class="post-title">
-      <h1><a href="/2013/08/22/a-quick-look-at-visual-node/">A quick look at Visual Node</a></h1>
+      <h1><a href="/2013/09/20/returning-multiple-fake-objects-with-fakeiteasy/">Returning multiple fake objects with FakeItEasy</a></h1>
     </div>
     <div class="post-meta-top">
-        <span class="post-date">August 22, 2013</span> <!-- <span class="post-author">Jonathan Channon</span> -->
+        <span class="post-date">September 20, 2013</span> <!-- <span class="post-author">Jonathan Channon</span> -->
         <!-- <span class="link-comments">20 comments</span> -->
-        <div class="commentcount" data-disqus-url="http://blog.jonathanchannon.com/2013/08/22/a-quick-look-at-visual-node/"></div>
+        <div class="commentcount" data-disqus-url="http://blog.jonathanchannon.com/2013/09/20/returning-multiple-fake-objects-with-fakeiteasy/"></div>
     </div>
     <!-- <div class="post-image"><img src="images/temp/slider_1_1.jpg" alt=""></div> -->
     <div class="post-descr entry">
-        <p>I came across <a href="http://www.visualnode.info/">Visual Node</a> a few months ago and was excited by the looks of it.  For those that didn't click that link, it basically brings the power of Visual Studio debugging to a node.js app.  You can write your node.js app in Visual Studio, fire up the debugger by hitting F5 and use breakpoints and watches to see what's going on.  </p>
+        <p>I was recently writing some unit tests where I needed to test that multiple calls to an interface returned different objects.  </p>
 
-<p>The hipster in me is screaming saying "You should be using Sublime Text and <a href="https://github.com/dannycoates/node-inspector">node-inspector</a> for debugging" but to be honest I found it a bit hackety-hack and it seemed a bit odd debugging my server app in Chrome but maybe that's just something I need to get over.  JavaScript is getting a huge surge in popularity recently so its your duty as a developer to investigate this.  I want to learn and understand JS better but I always get frustrated with it after 10mins and swear that I'm never going to touch a dynamic language again, "give me a statically typed language every time with a compiler".  I have a bit of a Jekyll and Hyde situation going on that I need to overcome.</p>
+<p>With <a href="https://github.com/FakeItEasy/FakeItEasy">FakeItEasy</a> this is easy:</p>
+
+<pre><code>A.CallTo(() =&gt; myInterface.GetSomething(1)).Returns(new Something())
+</code></pre>
+
+<p>All very nice, but now if I have multiple calls to <code>myInterface</code> I have to execute the above statement 'x' amount of times:</p>
+
+<pre><code>[Fact]
+public void Should_Do_Something()
+{
+  var myInterface = A.Fake&lt;IApplication&gt;();
+  A.CallTo(() =&gt; myInterface.GetSomething(1)).Returns(new Something());
+  A.CallTo(() =&gt; myInterface.GetSomething(2)).Returns(new Something());
+  A.CallTo(() =&gt; myInterface.GetSomething(3)).Returns(new Something());
+
+  var result = sut.DoSomething(myInterface);
+
+  Assert.Equal("Super Duper", result);
+}
+</code></pre>
 
 <!--excerpt-->
 
-<p>When I saw Visual Node it appeared to my statically typed side. "Ooooh, proper debugging, this looks interesting".  So I signed up to be kept up to date when they were ready for beta testers and yesterday I got my email saying I could download a private beta version and give it a whirl. So that's what I did.</p>
+<p>There is a tidier way to do the above where you can return specific objects and its called <code>ReturnsLazily</code>.  Lets take a look at this:</p>
 
-<p>I went over to their <a href="http://www.visualnode.info/readme">README</a> page which explained how to install it and some of the features.  I installed a VSIX which gives me a project template to choose from when creating a project in Visual Studio(VS).</p>
+<pre><code>public class Employee
+{
+    public string Name { get; set; }
+}
 
-<p><img src="http://www.visualnode.info/images/readme/new-project.png" alt="Project Template" /></p>
+public interface IEmployeeRepository
+{
+    Employee GetEmployeeById(int id);
+}
 
-<p>Selecting this gives you a basic http server app template.</p>
+public class App
+{
+    private readonly IEmployeeRepository employeeRepository;
 
-<p><img src="/images/blogpostimages/projectlayout.PNG" alt="Project Layout" /></p>
+    public App(IEmployeeRepository employeeRepository)
+    {
+        this.employeeRepository = employeeRepository;
+    }
 
-<p>I like that they have tried to bring a <a href="http://www.nuget.org/">NuGet</a> style dialog for searching packages in <a href="https://npmjs.org/">NPM</a>.</p>
+    public string GetNamesAsCsv(int[] ids)
+    {
+        var employees = ids.Select(id =&gt; employeeRepository.GetEmployeeById(id).Name);
+        return string.Join(",", employees);
+    }
+}
 
-<p><img src="http://www.visualnode.info/images/readme/package.png" alt="NPM Picture" /></p>
+public class AppTests
+{
+    [Fact]
+    public void AppReturnsNamesAsCsv()
+    {
+        //Given
+        var employees = new Dictionary&lt;int, Employee&gt;
+        {
+            { 1, new Employee { Name = "Moss"} },
+            { 2, new Employee { Name = "Roy"} },
+        };
 
-<p>This brings a sense of familiarity to Visual Studio users which is great. It orders its results alphabetically. I found the searching a bit slow but I'm not sure if that's down to my internet connection or how NPM handles searching.</p>
+        var fakeRepository = A.Fake&lt;IEmployeeRepository&gt;();
+        A.CallTo(() =&gt; fakeRepository.GetEmployeeById(A&lt;int&gt;.Ignored))
+            .ReturnsLazily&lt;Employee, int&gt;(id =&gt; employees[id]);
 
-<p>The code in the template is:</p>
+        var app = new App(fakeRepository);
 
-<pre><code>// Load the http module to create an http server.
-var http = require('http');
+        //When
+        var result = app.GetNamesAsCsv(employees.Keys.ToArray());
 
-// Configure our HTTP server to respond with Hello World to all requests.
-var server = http.createServer(function (request, response) {
-    response.writeHead(200, { "Content-Type": "text/plain" });
-    response.end("Hello World\n");
-});
-
-// Listen on port 8000, IP defaults to 127.0.0.1
-server.listen(8000);
-
-// Put a friendly message on the terminal
-console.log("Server running at http://127.0.0.1:8000/");
+        //Then
+        Assert.Equal("Moss,Roy", result);
+    }
+}
 </code></pre>
 
-<p>I then pressed F5 to see what happened.</p>
+<p>We have an <code>Employee</code> object, a <code>IEmployeeRepository</code> which returns an <code>Employee</code> object and an App that returns a CSV.  We then want to test this and make sure we get back a CSV from multiple objects.</p>
 
-<p>It fires up a console app and a browser:</p>
+<p>So we set our fake setup and say that when <code>GetEmployeeById</code> is called we want to return a specific object.  Our App class will call <code>GetEmployeeById</code> twice with the id of 1 and 2.  This is done by passing in <code>employees.Keys.ToArray()</code> to our GetNamesAsCsv method under test. </p>
 
-<p><img src="/images/blogpostimages/console.png" alt="Console" />
-<img src="/images/blogpostimages/helloworldbrowser.PNG" alt="Browser" /></p>
+<p>When this is called with the id we want to return specific objects <code>.ReturnsLazily&lt;Employee, int&gt;(id =&gt; employees[id]);</code></p>
 
-<p>I then went back to Visual Studio and put a breakpoint on the <code>response.end("Hello World\n");"</code> to see what would happen when I refreshed my browser.</p>
+<p>This says we want to return an Employee and the argument in the repository call is an int.  We can then use that to return a specific object based on that id which is where the <code>Dictionary&lt;int, Employee&gt;</code> comes in handy.  Based on the key it will return either an Employee called Moss or Roy.  Our <code>GetNamesAsCsv</code> will then join Moss &amp; Roy together as a CSV and we can assert that our method works.</p>
 
-<p><img src="/images/blogpostimages/debugging.png" alt="Debugging" /></p>
-
-<p>It stopped on the breakpoint and gives me information about the objects in scope etc and let me step into the current line.</p>
-
-<p><img src="/images/blogpostimages/f11.png" alt="F11" /></p>
-
-<p>That's a pretty basic hello world style of seeing what Visual Node can do but that static language side of me really likes the look of this and the potential it can bring. I believe <a href="http://www.jetbrains.com/webstorm">WebStorm</a> also provides node.js debugging so check that out but for pure familiarity reasons I like the look of this.</p>
-
-<p>For a better understanding here's a video:</p>
-
-<iframe width="560" height="315" src="//www.youtube.com/embed/gXGLGVWWwKI" frameborder="0" allowfullscreen></iframe>
+<p>Hope that helps someone!</p>
 
     </div> 
     <div id="tagcloud">
-     <a href="/category/visual-studio"><span>visual studio</span></a>
-     <a href="/category/javascript"><span>javascript</span></a>
-     <a href="/category/visual-node"><span>visual node</span></a>
+     <a href="/category/fake-it-easy"><span>fake it easy</span></a>
+     <a href="/category/oss"><span>oss</span></a>
+     <a href="/category/unit-testing"><span>unit testing</span></a>
+     <a href="/category/integration-testing"><span>integration testing</span></a>
+     <a href="/category/c"><span>c#</span></a>
+     <a href="/category/.net"><span>.net</span></a>
     </div>
     <span itemprop="author" itemscope itemtype="http://schema.org/Person">
         <meta itemprop="name" content="Jonathan Channon">
@@ -151,7 +183,7 @@ console.log("Server running at http://127.0.0.1:8000/");
     <div id="disqus_thread"></div>
 <script>
     var disqus_shortname = 'jonathanchannonblog';
-    var disqus_url = 'http://blog.jonathanchannon.com/2013/08/22/a-quick-look-at-visual-node/';
+    var disqus_url = 'http://blog.jonathanchannon.com/2013/09/20/returning-multiple-fake-objects-with-fakeiteasy/';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

@@ -1,4 +1,116 @@
-﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/09/16/enabling-cors-in-iisexpress/</guid><link>http://blog.jonathanchannon.com/2013/09/16/enabling-cors-in-iisexpress/</link><title>Enabling CORS in IISExpress</title><description>&lt;p&gt;I was playing around with &lt;a href="https://github.com/wordnik/swagger-ui"&gt;swagger-ui&lt;/a&gt; and was trying to point it to a local endpoint that I started with IIS Express.  I was getting an error saying that it needed the endpoint to accept Access-Control-Allow-Origin requests.&lt;/p&gt;
+﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/09/20/returning-multiple-fake-objects-with-fakeiteasy/</guid><link>http://blog.jonathanchannon.com/2013/09/20/returning-multiple-fake-objects-with-fakeiteasy/</link><title>Returning multiple fake objects with FakeItEasy</title><description>&lt;p&gt;I was recently writing some unit tests where I needed to test that multiple calls to an interface returned different objects.  &lt;/p&gt;
+
+&lt;p&gt;With &lt;a href="https://github.com/FakeItEasy/FakeItEasy"&gt;FakeItEasy&lt;/a&gt; this is easy:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;A.CallTo(() =&amp;gt; myInterface.GetSomething(1)).Returns(new Something())
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;All very nice, but now if I have multiple calls to &lt;code&gt;myInterface&lt;/code&gt; I have to execute the above statement 'x' amount of times:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[Fact]
+public void Should_Do_Something()
+{
+  var myInterface = A.Fake&amp;lt;IApplication&amp;gt;();
+  A.CallTo(() =&amp;gt; myInterface.GetSomething(1)).Returns(new Something());
+  A.CallTo(() =&amp;gt; myInterface.GetSomething(2)).Returns(new Something());
+  A.CallTo(() =&amp;gt; myInterface.GetSomething(3)).Returns(new Something());
+
+  var result = sut.DoSomething(myInterface);
+
+  Assert.Equal("Super Duper", result);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+</description><pubDate>Thu, 19 Sep 2013 23:00:00 Z</pubDate><a10:updated>2013-09-19T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I was recently writing some unit tests where I needed to test that multiple calls to an interface returned different objects.  &lt;/p&gt;
+
+&lt;p&gt;With &lt;a href="https://github.com/FakeItEasy/FakeItEasy"&gt;FakeItEasy&lt;/a&gt; this is easy:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;A.CallTo(() =&amp;gt; myInterface.GetSomething(1)).Returns(new Something())
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;All very nice, but now if I have multiple calls to &lt;code&gt;myInterface&lt;/code&gt; I have to execute the above statement 'x' amount of times:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[Fact]
+public void Should_Do_Something()
+{
+  var myInterface = A.Fake&amp;lt;IApplication&amp;gt;();
+  A.CallTo(() =&amp;gt; myInterface.GetSomething(1)).Returns(new Something());
+  A.CallTo(() =&amp;gt; myInterface.GetSomething(2)).Returns(new Something());
+  A.CallTo(() =&amp;gt; myInterface.GetSomething(3)).Returns(new Something());
+
+  var result = sut.DoSomething(myInterface);
+
+  Assert.Equal("Super Duper", result);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;!--excerpt--&gt;
+
+&lt;p&gt;There is a tidier way to do the above where you can return specific objects and its called &lt;code&gt;ReturnsLazily&lt;/code&gt;.  Lets take a look at this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class Employee
+{
+    public string Name { get; set; }
+}
+
+public interface IEmployeeRepository
+{
+    Employee GetEmployeeById(int id);
+}
+
+public class App
+{
+    private readonly IEmployeeRepository employeeRepository;
+
+    public App(IEmployeeRepository employeeRepository)
+    {
+        this.employeeRepository = employeeRepository;
+    }
+
+    public string GetNamesAsCsv(int[] ids)
+    {
+        var employees = ids.Select(id =&amp;gt; employeeRepository.GetEmployeeById(id).Name);
+        return string.Join(",", employees);
+    }
+}
+
+public class AppTests
+{
+    [Fact]
+    public void AppReturnsNamesAsCsv()
+    {
+        //Given
+        var employees = new Dictionary&amp;lt;int, Employee&amp;gt;
+        {
+            { 1, new Employee { Name = "Moss"} },
+            { 2, new Employee { Name = "Roy"} },
+        };
+
+        var fakeRepository = A.Fake&amp;lt;IEmployeeRepository&amp;gt;();
+        A.CallTo(() =&amp;gt; fakeRepository.GetEmployeeById(A&amp;lt;int&amp;gt;.Ignored))
+            .ReturnsLazily&amp;lt;Employee, int&amp;gt;(id =&amp;gt; employees[id]);
+
+        var app = new App(fakeRepository);
+
+        //When
+        var result = app.GetNamesAsCsv(employees.Keys.ToArray());
+
+        //Then
+        Assert.Equal("Moss,Roy", result);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We have an &lt;code&gt;Employee&lt;/code&gt; object, a &lt;code&gt;IEmployeeRepository&lt;/code&gt; which returns an &lt;code&gt;Employee&lt;/code&gt; object and an App that returns a CSV.  We then want to test this and make sure we get back a CSV from multiple objects.&lt;/p&gt;
+
+&lt;p&gt;So we set our fake setup and say that when &lt;code&gt;GetEmployeeById&lt;/code&gt; is called we want to return a specific object.  Our App class will call &lt;code&gt;GetEmployeeById&lt;/code&gt; twice with the id of 1 and 2.  This is done by passing in &lt;code&gt;employees.Keys.ToArray()&lt;/code&gt; to our GetNamesAsCsv method under test. &lt;/p&gt;
+
+&lt;p&gt;When this is called with the id we want to return specific objects &lt;code&gt;.ReturnsLazily&amp;lt;Employee, int&amp;gt;(id =&amp;gt; employees[id]);&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;This says we want to return an Employee and the argument in the repository call is an int.  We can then use that to return a specific object based on that id which is where the &lt;code&gt;Dictionary&amp;lt;int, Employee&amp;gt;&lt;/code&gt; comes in handy.  Based on the key it will return either an Employee called Moss or Roy.  Our &lt;code&gt;GetNamesAsCsv&lt;/code&gt; will then join Moss &amp;amp; Roy together as a CSV and we can assert that our method works.&lt;/p&gt;
+
+&lt;p&gt;Hope that helps someone!&lt;/p&gt;
+</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/09/16/enabling-cors-in-iisexpress/</guid><link>http://blog.jonathanchannon.com/2013/09/16/enabling-cors-in-iisexpress/</link><title>Enabling CORS in IISExpress</title><description>&lt;p&gt;I was playing around with &lt;a href="https://github.com/wordnik/swagger-ui"&gt;swagger-ui&lt;/a&gt; and was trying to point it to a local endpoint that I started with IIS Express.  I was getting an error saying that it needed the endpoint to accept Access-Control-Allow-Origin requests.&lt;/p&gt;
 
 &lt;p&gt;I went Googling and it couldn't find anything specific to IIS Express but managed to use some guidance for full blown IIS.&lt;/p&gt;
 
@@ -744,137 +856,4 @@ document.body.innerHTML = greeter(user);
 &lt;p&gt;Anyway it now works and either I’m too entrenched in Visual Studio and should learn to adapt to new IDE’s or I expect things to just work without having to &lt;a href="http://en.wikipedia.org/wiki/RTFM"&gt;RTFM&lt;/a&gt;. I must say if I have to read the manual on how to use pieces of software you have an instant fail however, as I’ve heard such great things about Jetbrains and Webstorm I’m willing to give it another go but it has me on the back foot already. I’m also still unsure how to set WebStorm up to use a local web server because debugging by pointing to a file system seems wrong, if anyone knows please let me know.&lt;/p&gt;
 
 &lt;p&gt;I hope this helps someone else to get up and running with TypeScript and WebStorm, if not I’m sure there are plenty who’ve had a laugh from this article asking how one person can be so dumb :)&lt;/p&gt;
-</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/04/08/using-a-markdown-viewengine-with-nancy/</guid><link>http://blog.jonathanchannon.com/2013/04/08/using-a-markdown-viewengine-with-nancy/</link><title>Using a Markdown ViewEngine with Nancy</title><description>&lt;p&gt;Whilst using &lt;a href="http://stackoverflow.com"&gt;stackoverflow.com&lt;/a&gt; and &lt;a href="https://gist.github.com/"&gt;Github gists&lt;/a&gt; I’ve become a frequent user of &lt;a href="http://daringfireball.net/projects/markdown/"&gt;Markdown&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;For those of you that don’t know what Markdown is, its essentially a shorter/cleaner syntax that can be parsed to produce HTML. Below are a few examples:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;#Hello World!
-##You're awesome!
-The quick brown fox jumped over the lazy coder
-What the **hell** is this?
-This is an [example link](http://example.com/)
-
-&amp;lt;h1&amp;gt;Hello World!&amp;lt;/h1&amp;gt;
-&amp;lt;h2&amp;gt;You're awesome!&amp;lt;/h2&amp;gt;
-&amp;lt;p&amp;gt;The quick brown fox jumped over the lazy coder&amp;lt;/p&amp;gt;
-What the &amp;lt;strong&amp;gt;hell&amp;lt;/strong&amp;gt; is this?
-This is an &amp;lt;a href="http://example.com/"&amp;gt; example link&amp;lt;/a&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can see more examples in the earlier link.&lt;/p&gt;
-
-&lt;p&gt;When you’re writing a blog post or a lengthy page in your web app with lots of HTML it maybe easier to use Markdown as your preferred syntax. I currently use WordPress for my blog, it’s ok but its quite bloated for probably what I need. I looked into &lt;a href="http://calepin.co/"&gt;Calepin&lt;/a&gt; and &lt;a href="http://scriptogr.am/"&gt;Scriptogr.am&lt;/a&gt; as alternative blogging platforms but I felt it didn’t quite offer what I wanted but the approach was a good idea. It meant you could write a blog post and simply put the file in dropbox and it would appear on your blog.&lt;/p&gt;
-
-</description><pubDate>Sun, 07 Apr 2013 23:00:00 Z</pubDate><a10:updated>2013-04-07T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;Whilst using &lt;a href="http://stackoverflow.com"&gt;stackoverflow.com&lt;/a&gt; and &lt;a href="https://gist.github.com/"&gt;Github gists&lt;/a&gt; I’ve become a frequent user of &lt;a href="http://daringfireball.net/projects/markdown/"&gt;Markdown&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;For those of you that don’t know what Markdown is, its essentially a shorter/cleaner syntax that can be parsed to produce HTML. Below are a few examples:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;#Hello World!
-##You're awesome!
-The quick brown fox jumped over the lazy coder
-What the **hell** is this?
-This is an [example link](http://example.com/)
-
-&amp;lt;h1&amp;gt;Hello World!&amp;lt;/h1&amp;gt;
-&amp;lt;h2&amp;gt;You're awesome!&amp;lt;/h2&amp;gt;
-&amp;lt;p&amp;gt;The quick brown fox jumped over the lazy coder&amp;lt;/p&amp;gt;
-What the &amp;lt;strong&amp;gt;hell&amp;lt;/strong&amp;gt; is this?
-This is an &amp;lt;a href="http://example.com/"&amp;gt; example link&amp;lt;/a&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can see more examples in the earlier link.&lt;/p&gt;
-
-&lt;p&gt;When you’re writing a blog post or a lengthy page in your web app with lots of HTML it maybe easier to use Markdown as your preferred syntax. I currently use WordPress for my blog, it’s ok but its quite bloated for probably what I need. I looked into &lt;a href="http://calepin.co/"&gt;Calepin&lt;/a&gt; and &lt;a href="http://scriptogr.am/"&gt;Scriptogr.am&lt;/a&gt; as alternative blogging platforms but I felt it didn’t quite offer what I wanted but the approach was a good idea. It meant you could write a blog post and simply put the file in dropbox and it would appear on your blog.&lt;/p&gt;
-
-&lt;!--excerpt--&gt;
-
-&lt;p&gt;As you may be aware, I’m a great fan of &lt;a href="http://nancyfx.org/"&gt;Nancy&lt;/a&gt; and the team/contributors were discussing having something similar to Calepin for Nancy so users could upload a Markdown file as a pull request or community article or have something that uses Markdown that can be plugged into Jekyll.&lt;/p&gt;
-
-&lt;p&gt;I initially looked into how hard it would be to convert Markdown into HTML with Nancy and as ever, very easy! I found some libraries that already provided the conversion process and decided upon &lt;a href="http://nuget.org/packages/MarkdownSharp/"&gt;MarkdownSharp&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;I then thought we could use Markdown as a proper view engine like Razor. I was unsure of how to provide the ability of model binding, master pages etc but after speaking to &lt;a href="http://twitter.com/grumpydev"&gt;@grumpydev&lt;/a&gt; he suggested using the built in view engine with Nancy to provide that functionality.&lt;/p&gt;
-
-&lt;p&gt;What this means is that you can have a Nancy route such as:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class SampleModule : NancyModule
-{
-    public SampleModule()
-    {
-        Get["/"] = _ =&amp;gt;
-        {
-          var model = new UserModel{FirstName = "John", LastName = "Smith"};
-          return View["Home", model];
-        }
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will find a Markdown file called Home.md or Home.markdown, translate the model and convert the markdown into a HTML view. You could define you markdown view like so:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;#Hi there!
-
-My first name is [ERR!] and my last name is [ERR!]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This would then translate to:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;h1&amp;gt;Hi there!&amp;lt;/h1&amp;gt;
-&amp;lt;p&amp;gt;My first name is John and my last name is Smith&amp;lt;/p&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is a simple demonstration but what it means is that you can now use the Markdown view engine instead of Razor if you so wished. Things like model binding, master pages, partials, model iteration etc etc can all be handled by the view engine and your views can be written in Markdown. To use features like partials and master pages you use the Super Simple View Engine syntax that as it sounds is super simple.&lt;/p&gt;
-
-&lt;p&gt;When I wrote the Markdown view engine I also wrote a demo with the easy approach of Calepin in mind.&lt;/p&gt;
-
-&lt;p&gt;I wrote a HTML view to act as my master page and then a route in Nancy that would take anything after the URL and find the view for it:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Get["/{viewname}"] = parameters =&amp;gt;
-{
-    var popularposts = GetModel();
-
-    dynamic postModel = new ExpandoObject();
-    postModel.PopularPosts = popularposts;
-    postModel.MetaData = popularposts.FirstOrDefault(x =&amp;gt; x.Slug == parameters.viewname);
-
-    return View["Posts/" + parameters.viewname, postModel];
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In the Markdown file I would reference the master page, some partials, the model and a custom section for meta data about the blog post:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;@Master['master']
-
-@Tags
-Date: 15/03/2013
-Title: Readme
-Tags: Nancy,Runtime
-@EndTags
-
-@Section['Content']
-
-[ERR!]
-
-# Readme!
-
-## Markdown Viewengine
-
-This Markdown Viewengine allows views to be written in Markdown.
-
-* Full Model support
-* Master page support
-* Supports HTML within any MD content
-* Simple call `return View["Home"]` for Nancy to render your MD file
-
-## Markdown Blog Demo
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This would then render a good looking website with all the features expected in a view engine. It would use the meta data provided to write out things like page titles and tags for a blog post. It would also mean you could use the approach to write your own blog using Nancy and Markdown.&lt;/p&gt;
-
-&lt;p&gt;The GetModel() method used above checks a “Posts” directory for Markdown files and reads the metadata for them. What this means is that you can easily write a blog post using Nancy, Markdown and SuperSimpleViewEngine by just uploading the markdown file to a specific directory.&lt;/p&gt;
-
-&lt;p&gt;Ideally I would like to get rid of the master page and partial references so you could just have Markdown content in your file but I haven’t figured that out yet. Hopefully someone else can use the Markdown view engine or take the demo app and find an alternative way to provide the simplicity that Calepin offers.&lt;/p&gt;
-
-&lt;p&gt;Overall it’s another nice feature that Nancy can offer its users and I have enjoyed contributing to the OSS project and tinkering with code!&lt;/p&gt;
-
-&lt;p&gt;The Markdown View Engine and Demo will be released in 0.17 of Nancy due very soon!&lt;/p&gt;
 </a10:content></item></channel></rss>
