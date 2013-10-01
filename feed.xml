@@ -1,4 +1,162 @@
-﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/09/20/returning-multiple-fake-objects-with-fakeiteasy/</guid><link>http://blog.jonathanchannon.com/2013/09/20/returning-multiple-fake-objects-with-fakeiteasy/</link><title>Returning multiple fake objects with FakeItEasy</title><description>&lt;p&gt;I was recently writing some unit tests where I needed to test that multiple calls to an interface returned different objects.  &lt;/p&gt;
+﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/10/01/blogging-with-markdown-and-git/</guid><link>http://blog.jonathanchannon.com/2013/10/01/blogging-with-markdown-and-git/</link><title>Blogging with Markdown &amp; deploying via Git - Introducing Sandra.Snow</title><description>&lt;p&gt;There are many markdown blogging engines out there such as &lt;a href="http://calepin.co/"&gt;Calepin&lt;/a&gt;, &lt;a href="http://scriptogr.am/"&gt;Scriptogram&lt;/a&gt; and even &lt;a href="http://wordpress.org/"&gt;WordPress&lt;/a&gt; allows you to write blog posts in Markdown but &lt;a href="https://github.com/Sandra/Sandra.Snow"&gt;Sandra.Snow&lt;/a&gt; tries to add something different.  Firstly, it is written in .Net and &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt;, secondly its a static blog generator and finally it supports Git deployment.&lt;/p&gt;
+
+&lt;p&gt;Even if you don't want to use Git deployment you can use FTP, its a great tool.  To write your blog post in Markdown you need a custom header in your file so it knows some information about your post.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;---
+layout: post
+category: Azure
+title: Setting up a ServiceStack Service
+---
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It then parses this information along with your Markdown into its engine, uses a Markdown view engine to convert the file content into HTML, assign model properties based on the header and creates a HTML file using the model via a Razor viewengine.&lt;/p&gt;
+
+&lt;p&gt;The "layout" refers to the Razor file it uses to render the final HTML file.  This allows you to style your pages and blog posts whichever way you'd prefer.  These "layout" files should exist in the "_layouts" folder for your site template.  The site template is a set of files and folders that Sandra.Snow uses to produce the final static website.&lt;/p&gt;
+
+&lt;p&gt;The "category" or "categories" property, you can use both for singular or multiple comma-seperated values that refer to the category/categories of your blog post.&lt;/p&gt;
+
+&lt;p&gt;The "title" should hopefully be self explanatory!&lt;/p&gt;
+
+&lt;p&gt;You can optionally add an author and email properties to override the global config settings for example, if you wanted to allow guest author blog posts.  There is also an optional metadescription property you can use for SEO.
+</description><pubDate>Mon, 30 Sep 2013 23:00:00 Z</pubDate><a10:updated>2013-09-30T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;There are many markdown blogging engines out there such as &lt;a href="http://calepin.co/"&gt;Calepin&lt;/a&gt;, &lt;a href="http://scriptogr.am/"&gt;Scriptogram&lt;/a&gt; and even &lt;a href="http://wordpress.org/"&gt;WordPress&lt;/a&gt; allows you to write blog posts in Markdown but &lt;a href="https://github.com/Sandra/Sandra.Snow"&gt;Sandra.Snow&lt;/a&gt; tries to add something different.  Firstly, it is written in .Net and &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt;, secondly its a static blog generator and finally it supports Git deployment.&lt;/p&gt;
+
+&lt;p&gt;Even if you don't want to use Git deployment you can use FTP, its a great tool.  To write your blog post in Markdown you need a custom header in your file so it knows some information about your post.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;---
+layout: post
+category: Azure
+title: Setting up a ServiceStack Service
+---
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It then parses this information along with your Markdown into its engine, uses a Markdown view engine to convert the file content into HTML, assign model properties based on the header and creates a HTML file using the model via a Razor viewengine.&lt;/p&gt;
+
+&lt;p&gt;The "layout" refers to the Razor file it uses to render the final HTML file.  This allows you to style your pages and blog posts whichever way you'd prefer.  These "layout" files should exist in the "_layouts" folder for your site template.  The site template is a set of files and folders that Sandra.Snow uses to produce the final static website.&lt;/p&gt;
+
+&lt;p&gt;The "category" or "categories" property, you can use both for singular or multiple comma-seperated values that refer to the category/categories of your blog post.&lt;/p&gt;
+
+&lt;p&gt;The "title" should hopefully be self explanatory!&lt;/p&gt;
+
+&lt;p&gt;You can optionally add an author and email properties to override the global config settings for example, if you wanted to allow guest author blog posts.  There is also an optional metadescription property you can use for SEO.
+&lt;!--excerpt--&gt;&lt;/p&gt;
+
+&lt;h3&gt;Global Config&lt;/h3&gt;
+
+&lt;p&gt;In the root of the site template is a snow.config file which is what Sandra.Snow uses to determine url format, where to look for posts and layouts and other related information. It is JSON formatted and looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  "blogTitle" : "Joe Bloggs Blog",
+  "author" : "Mr.Guest",
+  "email" : "guest@gmail.com",
+  "siteUrl": "http://blog.joebloggs.com",
+  "posts": "Snow/_posts",
+  "layouts": "Snow/_layouts",
+  "output": "../MYRelativeWebsiteFolder",
+  "urlFormat": "yyyy/MM/dd/slug",
+  "copyDirectories": [
+    "Snow/images =&amp;gt; images",
+    "Snow/js =&amp;gt; js",
+    "Snow/css =&amp;gt; css"
+  ],
+  "processFiles": [{
+    "file": "Snow/index.cshtml",
+    "loop": "Posts"
+  },{
+    "file": "Snow/category.cshtml",
+    "loop": "Categories"
+  },{
+    "file": "Snow/categories.cshtml =&amp;gt; categories"
+  },{
+    "file": "Snow/archive.cshtml =&amp;gt; archive"
+  },{
+    "file": "Snow/about.cshtml =&amp;gt; about"
+  },{
+    "file": "Snow/contact.cshtml =&amp;gt; contact"
+  },{
+    "file": "feed.xml",
+    "loop": "RSS"
+  },{
+    "file": "sitemap.xml",
+    "loop": "sitemap"
+  }]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here is an explanation:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;"blogTitle" : The title of the blog you want to appear on your RSS feed&lt;/li&gt;
+&lt;li&gt;"author" : The author's name&lt;/li&gt;
+&lt;li&gt;"email" : The author's email.(You can use an &lt;a href="https://github.com/Sandra/Sandra.Snow/wiki/Gravatar-Support"&gt;HTMLHelper&lt;/a&gt; in the view that gets the author's Gravatar from the global/post settings)&lt;/li&gt;
+&lt;li&gt;"siteUrl": "This is used to enable Disqus support. Simply use an &lt;a href="https://github.com/Sandra/Sandra.Snow/wiki/Disqus-Support"&gt;HTMLHelper&lt;/a&gt; to render Disqus comments"&lt;/li&gt;
+&lt;li&gt;"posts" : The location of the markdown files&lt;/li&gt;
+&lt;li&gt;"layouts" : The location of the layout files&lt;/li&gt;
+&lt;li&gt;"output" : The location where Sandra.Snow will put the static HTML. This is relative&lt;/li&gt;
+&lt;li&gt;"urlFormat" : The format of the URL to your blog post&lt;/li&gt;
+&lt;li&gt;"copyDirectories" : The directories in your template that it will copy to the output&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;"processFiles" : This takes an object of the filename and property information on how to render the file.  Each file/view will be called and rendered with model information availble.  The model information available to these views are shown below:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public List&amp;lt;Post&amp;gt; PostsInCategory { get; set; }
+public Dictionary&amp;lt;int, Dictionary&amp;lt;int, List&amp;lt;Post&amp;gt;&amp;gt;&amp;gt; PostsGroupedByYearThenMonth { get; set; }
+public List&amp;lt;Post&amp;gt; Posts { get; set; }
+public List&amp;lt;Post&amp;gt; PostsPaged { get; set; }
+
+
+public bool HasPreviousPage { get; set; }
+public bool HasNextPage { get; set; }
+public int NextPage { get; set; }
+public int PreviousPage { get; set; }
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In the standard website template there are category, categories, about and index *.cshtml pages which accept this model information and render the relevant information. Based on the file name you can guess what each file outputs.  The "loop" in the settings is used internally by Sandra.Snow to process the relevant data. For example "RSS" creates a RSS file based on the list of posts while Posts/Categories create sub-directories for the relevant model type eg/categories/posts.  "sitemap" will use the &lt;code&gt;List&amp;lt;Post&amp;gt;&lt;/code&gt; to create a sitemap.xml in the root of your blog. &lt;/p&gt;
+
+&lt;p&gt;As Sandra.Snow is a static HTML generator it will create folders with the relevant name for the post or file named in the config file eg/&lt;code&gt;http://mydomain.com/2013/08/18/this-is-a-great-article&lt;/code&gt; or &lt;code&gt;http://mydomain.com/categories&lt;/code&gt; and create a &lt;code&gt;index.html&lt;/code&gt; file for each folder.  In the root of the website it will create a &lt;code&gt;index.html&lt;/code&gt; with 10 blog posts inside it.  If you have 100 markdown posts it will it will page this for you and create links to &lt;code&gt;http://mydomain.com/page2&lt;/code&gt; etc.  If you use &lt;code&gt;&amp;lt;!--excerpt--&amp;gt;&lt;/code&gt; in your Markdown it will read up to that point so you can click a "read more" link otherwise it will use the whole Markdown content.    If you look at the model properties you'll see your index layout view can tell if there is a next/previous page and therefore create the relevant links in the HTML.&lt;/p&gt;
+
+&lt;p&gt;Once you run the Sandra.Snow exe it will output the HTML and you can then FTP your files to your website.&lt;/p&gt;
+
+&lt;p&gt;Check out the &lt;a href="https://github.com/Sandra/Sandra.Snow/wiki"&gt;wiki&lt;/a&gt; for more details about other HTMLHelpers such as Google Analytics.&lt;/p&gt;
+
+&lt;h3&gt;Git Integration&lt;/h3&gt;
+
+&lt;p&gt;FTP is so 2001 so Sandra.Snow has a website called Sandra.Snow.Barbato which allows you to access it (final URL to be confirmed) and log in with your Github credentials.  It will then give you a list of your repositories, the idea being one of them is your blog with the markdown posts and snow.config etc.  A &lt;a href="https://github.com/Sandra/Sandra.Snow.BarbatoTemplate"&gt;base template&lt;/a&gt; is available in the Sandra repository for you to fork.  You can then choose whether you'd like to deploy to another Git repository that supports Git deployment eg/Azure, AppHarbor, Heroku or you can select FTP.  In either scenario, enter your details and off you go. The website will use Sandra.Snow to create the output and it will then wire it over to your chosen destination.  &lt;/p&gt;
+
+&lt;p&gt;Sandra.Snow.Barbato is also setup to handle Github hooks so in Github if you tell your repository to do a post commit hook to the website, after you write a new blog post and push to Github it will post to the website and know if you've previously logged in and if so generate the HTML and re-deploy your blog.  It will also push the generated content back to your Github repository on the master branch. Very nice!&lt;/p&gt;
+
+&lt;h3&gt;Setting up Sandra.Snow.Barbato&lt;/h3&gt;
+
+&lt;p&gt;One you have forked the Barbato template you can begin to style your blog pages.  Obviously every time you want to make a style change you want to see the results.  There are 2 ways to do this.  i) Run Sandra.Snow locally, setup a webserver eg/IISExpress to point to the Snow output directory and open up your browser to see the changes. Keep making changes to the *.cshtml and *.css files until happy ii) Make the changes in your repo, sign up with Sandra.Snow.Barbato and go to your domain to check the changes that were deployed.&lt;/p&gt;
+
+&lt;h4&gt;Azure&lt;/h4&gt;
+
+&lt;p&gt;If deploying to Azure you must have a .deployment file in the root of your repository that contains:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[config]
+project = Website
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is needed because when your template repository is pushed to Azure it needs to know what to deploy. This simply tells it to use the Website folder ie.the output folder from Sandra.Snow.&lt;/p&gt;
+
+&lt;h4&gt;Github Pages&lt;/h4&gt;
+
+&lt;p&gt;If deploying to Github you need a few things. Your repository needs to be called &lt;code&gt;username.github.io&lt;/code&gt;. You then need to create a CNAME file in your repo that has the domain you will be using inside it. Finally you need to setup the DNS on your domain to point to &lt;code&gt;username.github.io&lt;/code&gt; by creating a CNAME record in your DNS Manager. What you'll have to probably do is clone your &lt;code&gt;username.github.io&lt;/code&gt; repo and run Snow and set the output setting in snow.config to the path of your &lt;code&gt;username.github.io&lt;/code&gt; folder. You can then push the changes to Github. &lt;/p&gt;
+
+&lt;h3&gt;Wordpress Migration&lt;/h3&gt;
+
+&lt;p&gt;My blog was previously using Wordpress so I needed to get my data out.  The most common referred to tool was &lt;a href="https://github.com/dreikanter/wp2md"&gt;wp2md&lt;/a&gt; which uses Python to go through the exported Wordpress content and then convert to Markdown.  For some reason I didn't go with that choice and went with &lt;a href="http://heckyesmarkdown.com/"&gt;http://heckyesmarkdown.com/&lt;/a&gt;.  Its a bit more work because you have to give it your previous URLs to your blog posts and it reads the source of the page and converts it to Markdown.  It worked brilliantly for me.  I had to make a few changes on the output it provided by generally it was very good.&lt;/p&gt;
+
+&lt;p&gt;As I didn't want to worry about HTTP 302, I made sure I saved my markdown files as the urls are on my live site so &lt;a href="http://blog.jonathanchannon.com/2012/12/19/why-use-nancyfx/"&gt;http://blog.jonathanchannon.com/2012/12/19/why-use-nancyfx/&lt;/a&gt; was saved in a file called &lt;code&gt;2012-12-19-why-use-nancyfx.md&lt;/code&gt;. This file naming format is currently enforced so Snow can gather date and slug information(unsafe characters in the slug/title for URLs will be removed).&lt;/p&gt;
+
+&lt;p&gt;I then went through addind the meta headers to tell Sandra.Snow a bit more about the posts and also added in the &lt;code&gt;&amp;lt;!--excerpt--&amp;gt;&lt;/code&gt; information so not to render the whole blog content on the home pages.&lt;/p&gt;
+
+&lt;p&gt;I then went through and styled the master page &lt;code&gt;default.cshtml&lt;/code&gt; in the _layouts folder as well as the &lt;code&gt;post.cshtml&lt;/code&gt; and the other files in the root of the site template folder.&lt;/p&gt;
+
+&lt;p&gt;Once done I ran the .exe file to generate my content.  One of the great things about Sandra.Snow is its speed. It takes less than a second to do 100 blog posts, luckily I only have 25 so its really fast.  I opened up a browser and checked my files and if some styling needed tweaking I could do so and re-run.  Once all ok I can deploy or push the template folder to Github, setup the post commit hook and then use Sandra.Snow.Barbato to handle deployment from now on.&lt;/p&gt;
+
+&lt;h3&gt;Conclusion&lt;/h3&gt;
+
+&lt;p&gt;If you're a Git and Markdown user and want to create a blog with complete simplicity this is a great tool.  No more messy Wordpress, no more running exe's on your machine (unless you want to), its completely automated apart from writing the blog posts!  In fact I'm so happy with this project, this blog is using it!  Give it a try and if you like the look of it get involved with its development.  &lt;a href="https://github.com/Sandra/Sandra.Snow"&gt;Sandra.Snow&lt;/a&gt; the new modern, simplistic and effective tool for blogging.&lt;/p&gt;
+</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/09/20/returning-multiple-fake-objects-with-fakeiteasy/</guid><link>http://blog.jonathanchannon.com/2013/09/20/returning-multiple-fake-objects-with-fakeiteasy/</link><title>Returning multiple fake objects with FakeItEasy</title><description>&lt;p&gt;I was recently writing some unit tests where I needed to test that multiple calls to an interface returned different objects.  &lt;/p&gt;
 
 &lt;p&gt;With &lt;a href="https://github.com/FakeItEasy/FakeItEasy"&gt;FakeItEasy&lt;/a&gt; this is easy:&lt;/p&gt;
 
@@ -792,68 +950,4 @@ public void Should_contain_fiddly_in_response()
 &lt;p&gt;I would obviously recommend you put the fake setup in a factory method if you have multiple tests you class to prevent duplication. You can obviously then add header, querystring, form method arguments if you want the context populated with that kind of information.&lt;/p&gt;
 
 &lt;p&gt;Hope this helps anyone in a similar situation and provides a point of reference for the Fake It Easy project.&lt;/p&gt;
-</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/04/17/up-running-with-typescript-and-webstorm/</guid><link>http://blog.jonathanchannon.com/2013/04/17/up-running-with-typescript-and-webstorm/</link><title>Up &amp; Running with TypeScript and WebStorm</title><description>&lt;p&gt;I love my iMac and I’m on a mission to find a language I enjoy that I can use my Mac for (no Windows fan boy jokes please). There’s something in my mind I associate with work and my Windows laptop. Therefore, I don’t feel to excited about getting my laptop out of my bag in the evenings/weekends to play with other stuff.&lt;/p&gt;
-
-&lt;p&gt;As I want to broaden my knowledge I wanted to find something ideally statically typed (although I’m currently looking into Python) that would work on OS X. I’ve said previously that JavaScript seems the way to go in my current situation so I thought I’d take a look at TypeScript and also use &lt;a href="http://www.jetbrains.com/webstorm/"&gt;WebStorm&lt;/a&gt; from Jetbrains as my IDE seeing as I’ve heard so many great things about them and their products (don’t worry I use ReSharper).&lt;/p&gt;
-
-&lt;h2&gt;TypeScript&lt;/h2&gt;
-
-&lt;p&gt;So I went over to TypeScript’s &lt;a href="http://www.typescriptlang.org/"&gt;website&lt;/a&gt; and followed the Hello World type code examples under the “Learn” tab.&lt;/p&gt;
-
-</description><pubDate>Tue, 16 Apr 2013 23:00:00 Z</pubDate><a10:updated>2013-04-16T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I love my iMac and I’m on a mission to find a language I enjoy that I can use my Mac for (no Windows fan boy jokes please). There’s something in my mind I associate with work and my Windows laptop. Therefore, I don’t feel to excited about getting my laptop out of my bag in the evenings/weekends to play with other stuff.&lt;/p&gt;
-
-&lt;p&gt;As I want to broaden my knowledge I wanted to find something ideally statically typed (although I’m currently looking into Python) that would work on OS X. I’ve said previously that JavaScript seems the way to go in my current situation so I thought I’d take a look at TypeScript and also use &lt;a href="http://www.jetbrains.com/webstorm/"&gt;WebStorm&lt;/a&gt; from Jetbrains as my IDE seeing as I’ve heard so many great things about them and their products (don’t worry I use ReSharper).&lt;/p&gt;
-
-&lt;h2&gt;TypeScript&lt;/h2&gt;
-
-&lt;p&gt;So I went over to TypeScript’s &lt;a href="http://www.typescriptlang.org/"&gt;website&lt;/a&gt; and followed the Hello World type code examples under the “Learn” tab.&lt;/p&gt;
-
-&lt;!--excerpt--&gt;
-
-&lt;p&gt;After understanding the basics of it and wanting to learn more I spotted this demo code:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;class Student {
-    fullname : string;
-    constructor(public firstname, public middleinitial, public lastname) {
-        this.fullname = firstname %2B " " %2B middleinitial %2B " " %2B lastname;
-    }
-}
-
-interface Person {
-    firstname: string;
-    lastname: string;
-}
-
-function greeter(person : Person) {
-    return "Hello, " %2B person.firstname %2B " " %2B person.lastname;
-}
-
-var user = new Student("Jane", "M.", "User");
-
-document.body.innerHTML = greeter(user);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;There is an interface that expects public properties of firstname and lastname. There is a Student class that has a constructor with arguments for firstname, middleinitial and lastname. TypeScript constructor arguments are shorthand for making the arguments properties on the object itself without having to code all that yourself. We then have a function called greeter that takes a method argument of our Person interface and uses the properties of it to return a string. We then create a new instance of the Student class and then call the greeter function with our instance. Woooaaahhh! I want static typing, WTF is going on here? Essentially TypeScript allows for &lt;a href="http://en.wikipedia.org/wiki/Duck_typing"&gt;Duck Typing&lt;/a&gt; where any object that makes calls to or uses properties that match another type, it will allow. Now technically you can do this in C# by using the “dynamic” keyword but I would still keep and one to one mapping even if it was dynamic/duck typed so not to confuse future users.&lt;/p&gt;
-
-&lt;p&gt;It may be this example that I don’t like where properties are being un-used or the fact that the keyword “interface” is being used and the class is not statically implementing it but I guess this is how TypeScript uses interfaces ie/duck typing. I can’t think of a reason why you’d have an object that exposes properties that are not used when they have been shoe horned/duck typed into another with fewer properties etc, however, this might just be my statically typed mind not liking it and it should chill and get with the dynamic nature of things!&lt;/p&gt;
-
-&lt;h2&gt;Webstorm&lt;/h2&gt;
-
-&lt;p&gt;So in my quest to develop something on my Mac I chose Webstorm as my IDE. I haven’t heard one bad thing against Jetbrains so it must be good right? Must be simple and intuitive? Ummm, no. Webstorm has support for TypeScript and uses the computer’s version of TypeScript to compile *.ts files into *.js files. So I installed Node.js and TypeScript (&lt;em&gt;npm install -g typescript&lt;/em&gt;) and fired up Webstorm. Webstorm offers various project types to create new projects from but unfortunately no TypeScript one so I created an empty application. I added a *.ts file and Webstorm spots that this is a TypeScript file and wants to add a File Watcher. This means every time a change is made it recompiles in the background to produce *.js, that seems a bit keen for my liking and would prefer it on every time the file is saved but each to their own. I copied the above code into my my *.ts file. I then created a html file and referenced the JavaScript file that was created from the TypeScript compilation in the head section. (I’m using the term compilation but I guess it should be transpiling but you know what I’m getting at).&lt;/p&gt;
-
-&lt;p&gt;Ok, we’re ready to go and debug and here comes the confusion!&lt;/p&gt;
-
-&lt;p&gt;Being used to Visual Studio I thought it would start a web server instance up, open my system browser and away we go but unfortunately not. I was baffled but that doesn’t take much! I found the Run menu item and it had a Debug option and it then popped up window with a Edit Configuration option so I clicked that and it came up with the below:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src="/images/blogpostimages/WebstormDebug-620x390.png" alt="WebStorm Debug" title="Webstorm Debug" /&gt;&lt;/p&gt;
-
-&lt;p&gt;As there was no TypeScript option I assumed JavaScript was the option to go with. Under this option it has Local and Remote menu items to choose from. If you look at Local it autofills a path to the index.html on the filesystem, under the Remote option it shows the project structure and asks for a URL. I tried localhost:1234 but nothing so I went back to the filesystem option and clicked Apply but that doesn’t actually do anything.&lt;/p&gt;
-
-&lt;p&gt;So went through it all again and saw the + icon in the screenshot and it gives you an option to add a JavaScript configuration and is a complete mirror of the above screenshot. Very odd. Clicked Apply, then tried to Debug again and it gave me the configuration I chose and then opened Chrome. Nothing. WTF!&lt;/p&gt;
-
-&lt;p&gt;Had a rummage around WebStorm and saw a note about needing a Jetbrains Chrome extension to debug. So off to the Chrome Store I went and installed the plugin. Tried to Debug and it now opened a browser with my page so things are looking good. Went to the TypeScript file and put a breakpoint on a line but it wasn’t getting hit. I then put a breakpoint on a line in the JavaScript file and it got hit. Yay! But no content was in my page. Baffled again. WebStorm was saying that it couldn’t set the innerHTML property of null. Eh? How can a body be null? After a while of head scratching I sussed it. Those of you that are eagle eyed will have spotted that I put the script declaration in my head and therefore when it got executed there was no such thing as a body tag in the DOM yet. So I moved the script declaration to the body and bingo we have content. I should know better and should have put the script tag at the bottom of the body anyway but this was just a “Hello World” app so wasn’t too worried.&lt;/p&gt;
-
-&lt;p&gt;Anyway it now works and either I’m too entrenched in Visual Studio and should learn to adapt to new IDE’s or I expect things to just work without having to &lt;a href="http://en.wikipedia.org/wiki/RTFM"&gt;RTFM&lt;/a&gt;. I must say if I have to read the manual on how to use pieces of software you have an instant fail however, as I’ve heard such great things about Jetbrains and Webstorm I’m willing to give it another go but it has me on the back foot already. I’m also still unsure how to set WebStorm up to use a local web server because debugging by pointing to a file system seems wrong, if anyone knows please let me know.&lt;/p&gt;
-
-&lt;p&gt;I hope this helps someone else to get up and running with TypeScript and WebStorm, if not I’m sure there are plenty who’ve had a laugh from this article asking how one person can be so dumb :)&lt;/p&gt;
 </a10:content></item></channel></rss>
