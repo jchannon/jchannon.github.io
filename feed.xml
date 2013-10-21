@@ -1,4 +1,61 @@
-﻿<?xml version="1.0" encoding="utf-8"?><rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/10/01/blogging-with-markdown-and-git/</guid><link>http://blog.jonathanchannon.com/2013/10/01/blogging-with-markdown-and-git/</link><title>Blogging with Markdown &amp; Deploying via Git - Introducing Sandra.Snow</title><description>&lt;p&gt;There are many markdown blogging engines out there such as &lt;a href="http://calepin.co/"&gt;Calepin&lt;/a&gt;, &lt;a href="http://scriptogr.am/"&gt;Scriptogram&lt;/a&gt; and even &lt;a href="http://wordpress.org/"&gt;WordPress&lt;/a&gt; allows you to write blog posts in Markdown but &lt;a href="https://github.com/Sandra/Sandra.Snow"&gt;Sandra.Snow&lt;/a&gt; tries to add something different.  Firstly, it is written in .Net and &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt;, secondly its a static blog generator and finally it supports Git deployment.&lt;/p&gt;
+<rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/10/21/running-mocha-tests-with-sublime-text/</guid><link>http://blog.jonathanchannon.com/2013/10/21/running-mocha-tests-with-sublime-text/</link><title>Running Mocha tests within Sublime Text</title><description>&lt;p&gt;I spend most of my day in Visual Studio with lots of the goodies an IDE can offer.  One of them being able to run your tests from a keystroke.&lt;/p&gt;
+
+&lt;p&gt;In a bid to expand my mind I'm working on a little project that is made up of JS entirely so I've dug out &lt;a href="http://sublimetext.com"&gt;Sublime Text&lt;/a&gt;. It has lots of plugins that are very handy, especially &lt;a href="https://github.com/victorporof/Sublime-HTMLPrettify"&gt;Sublime-HTMLPrettify&lt;/a&gt; which will tidy your HTML, CSS &amp;amp; JS for you.&lt;/p&gt;
+
+&lt;p&gt;When writing tests for JS there are many libraries you can use but I've chosen &lt;a href="http://visionmedia.github.io/mocha/"&gt;Mocha&lt;/a&gt; for now.  The one thing I couldn't work out was to run my tests within Sublime Text until now.&lt;/p&gt;
+
+&lt;h3&gt;Build System&lt;/h3&gt;
+
+&lt;p&gt;Sublime allows you to have build systems a bit like an IDE so you can tell it what to do when you invoke it via &lt;kbd&gt;cmd&lt;/kbd&gt;+&lt;kbd&gt;B&lt;/kbd&gt;.&lt;/p&gt;
+
+&lt;p&gt;To get Mocha to run we need to create a new build system. To do this click Tools - Build System - New Build System and paste in the below:&lt;/p&gt;
+
+</description><pubDate>Sun, 20 Oct 2013 23:00:00 Z</pubDate><a10:updated>2013-10-20T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I spend most of my day in Visual Studio with lots of the goodies an IDE can offer.  One of them being able to run your tests from a keystroke.&lt;/p&gt;
+
+&lt;p&gt;In a bid to expand my mind I'm working on a little project that is made up of JS entirely so I've dug out &lt;a href="http://sublimetext.com"&gt;Sublime Text&lt;/a&gt;. It has lots of plugins that are very handy, especially &lt;a href="https://github.com/victorporof/Sublime-HTMLPrettify"&gt;Sublime-HTMLPrettify&lt;/a&gt; which will tidy your HTML, CSS &amp;amp; JS for you.&lt;/p&gt;
+
+&lt;p&gt;When writing tests for JS there are many libraries you can use but I've chosen &lt;a href="http://visionmedia.github.io/mocha/"&gt;Mocha&lt;/a&gt; for now.  The one thing I couldn't work out was to run my tests within Sublime Text until now.&lt;/p&gt;
+
+&lt;h3&gt;Build System&lt;/h3&gt;
+
+&lt;p&gt;Sublime allows you to have build systems a bit like an IDE so you can tell it what to do when you invoke it via &lt;kbd&gt;cmd&lt;/kbd&gt;+&lt;kbd&gt;B&lt;/kbd&gt;.&lt;/p&gt;
+
+&lt;p&gt;To get Mocha to run we need to create a new build system. To do this click Tools - Build System - New Build System and paste in the below:&lt;/p&gt;
+
+&lt;!--excerpt--&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+    "cmd": ["make"],
+    "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+    "working_dir": "${project_path:${folder:${file_path}}}",
+    "selector": "source.makefile",
+    "shell": true,
+    "variants": [{
+        "name": "Clean",
+        "cmd": ["make", "clean"]
+    }]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Click Save and call it Mocha&lt;/p&gt;
+
+&lt;p&gt;Now when you have a project go to Tools - Build System and select Mocha&lt;/p&gt;
+
+&lt;h3&gt;Make file&lt;/h3&gt;
+
+&lt;p&gt;A Make file is a script that allows you to execute various commands and its what our build system looks for when we tell Sublime to build our project. We need a file called &lt;code&gt;makefile&lt;/code&gt; in the root of our project.  Inside that &lt;code&gt;makefile&lt;/code&gt; we can invoke Mocha to run our tests.&lt;/p&gt;
+
+&lt;p&gt;Place this in your &lt;code&gt;makefile&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;test:
+    mocha --recursive --reporter spec moviebucketlist.tests/*.js
+.PHONY: test
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now when you invoke the build system via &lt;kbd&gt;cmd&lt;/kbd&gt;+&lt;kbd&gt;B&lt;/kbd&gt; in Sublime it will execute Mocha and give you the results in the console of Sublime.  Mocha by default will look for a folder called &lt;code&gt;test&lt;/code&gt; and execute the tests inside it. If you have a different folder name you can append the folder name and wildcard to js files like I have done above.&lt;/p&gt;
+
+&lt;p&gt;Happy Coding!&lt;/p&gt;
+</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/10/01/blogging-with-markdown-and-git/</guid><link>http://blog.jonathanchannon.com/2013/10/01/blogging-with-markdown-and-git/</link><title>Blogging with Markdown &amp; Deploying via Git - Introducing Sandra.Snow</title><description>&lt;p&gt;There are many markdown blogging engines out there such as &lt;a href="http://calepin.co/"&gt;Calepin&lt;/a&gt;, &lt;a href="http://scriptogr.am/"&gt;Scriptogram&lt;/a&gt; and even &lt;a href="http://wordpress.org/"&gt;WordPress&lt;/a&gt; allows you to write blog posts in Markdown but &lt;a href="https://github.com/Sandra/Sandra.Snow"&gt;Sandra.Snow&lt;/a&gt; tries to add something different.  Firstly, it is written in .Net and &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt;, secondly its a static blog generator and finally it supports Git deployment.&lt;/p&gt;
 
 &lt;p&gt;Even if you don't want to use Git deployment you can use FTP, its a great tool.  To write your blog post in Markdown you need a custom header in your file so it knows some information about your post.&lt;/p&gt;
 
@@ -863,91 +920,4 @@ pick d5bdb67 Other Commit message
 &lt;p&gt;Here comes the spanner in the works, the available jobs for Python, JVM languages or node.js are virtually non-existent so whilst as much as I bitch and moan that companies should look at MS alternatives I pretty much have to deal with it because the majority of jobs are for .Net with a MS stack. I could go the way of my friend mentioned earlier and work for myself writing software in using the tech/tooling I want but what if I run out of contracts and need to get back into the job market? I will face the same issue as he did.&lt;/p&gt;
 
 &lt;p&gt;There is no perfect job out there regardless of tech/tools used (if you say you have it then you are either a liar or very very lucky) which is something I have recently accepted but if the majority of jobs are on the MS stack and there are great alternative .Net projects waiting to be discovered can we please ask our companies to open their eyes and take a look at what else might be out there.&lt;/p&gt;
-</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/04/30/mocking-httpcontext-with-fake-it-easy/</guid><link>http://blog.jonathanchannon.com/2013/04/30/mocking-httpcontext-with-fake-it-easy/</link><title>Mocking HttpContext with Fake It Easy</title><description>&lt;p&gt;Lets start with the conclusion first and say “use &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt; for your web applications and APIs” as its brilliant!&lt;/p&gt;
-
-&lt;p&gt;If you want to continue reading lets crack on.&lt;/p&gt;
-
-&lt;p&gt;I’m currently working on a ASP.Net MVC project and one of the controller methods writes directly to the Response, &lt;em&gt;eg. Response.Write(“How will I mock thee?”);&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;Having moved over to &lt;a href="http://xunit.codeplex.com/"&gt;xUnit&lt;/a&gt; and &lt;a href="https://github.com/FakeItEasy/FakeItEasy"&gt;FakeItEasy&lt;/a&gt; recently I wanted to write a unit or integration test depending how you see it to assert against the Http Response.&lt;/p&gt;
-
-&lt;p&gt;Doing this is no easy feat with MVC (with Nancy its all &lt;a href="https://github.com/NancyFx/Nancy/wiki/Testing-your-application"&gt;done for you&lt;/a&gt;) and you have to mock a lot of things. I’m hoping that in later releases this will be fixed because I know that ASP.Net Web API has made things a bit easier for testing (and wrote a testing library for it) so I assume the two projects will use bits of each other or their roadmap will merge.&lt;/p&gt;
-
-</description><pubDate>Mon, 29 Apr 2013 23:00:00 Z</pubDate><a10:updated>2013-04-29T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;Lets start with the conclusion first and say “use &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt; for your web applications and APIs” as its brilliant!&lt;/p&gt;
-
-&lt;p&gt;If you want to continue reading lets crack on.&lt;/p&gt;
-
-&lt;p&gt;I’m currently working on a ASP.Net MVC project and one of the controller methods writes directly to the Response, &lt;em&gt;eg. Response.Write(“How will I mock thee?”);&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;Having moved over to &lt;a href="http://xunit.codeplex.com/"&gt;xUnit&lt;/a&gt; and &lt;a href="https://github.com/FakeItEasy/FakeItEasy"&gt;FakeItEasy&lt;/a&gt; recently I wanted to write a unit or integration test depending how you see it to assert against the Http Response.&lt;/p&gt;
-
-&lt;p&gt;Doing this is no easy feat with MVC (with Nancy its all &lt;a href="https://github.com/NancyFx/Nancy/wiki/Testing-your-application"&gt;done for you&lt;/a&gt;) and you have to mock a lot of things. I’m hoping that in later releases this will be fixed because I know that ASP.Net Web API has made things a bit easier for testing (and wrote a testing library for it) so I assume the two projects will use bits of each other or their roadmap will merge.&lt;/p&gt;
-
-&lt;!--excerpt--&gt;
-
-&lt;p&gt;I found that there a quite a lot of samples with Moq but nothing for Fake It Easy(FIE) so I checked in at the &lt;a href="https://jabbr.net/#/rooms/fakeiteasy"&gt;FIE Jabbr room&lt;/a&gt; and got some help and worked through some ideas and below is the result.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;//Controller
-public class MyController : Controller
-{
-    [HttpPost]
-    public void Index()
-    {
-        Response.Write("This is fiddly");
-        Response.Flush();
-    }
-}
-
-//Unit Test
-[Fact]
-public void Should_contain_fiddly_in_response()
-{
-    var sb = new StringBuilder();
-
-    var formCollection = new NameValueCollection();
-    formCollection.Add("MyPostedData","Boo");
-
-    var request = A.Fake();
-    A.CallTo(() =&amp;gt; request.HttpMethod).Returns("POST");
-    A.CallTo(() =&amp;gt; request.Headers).Returns(new NameValueCollection());
-    A.CallTo(() =&amp;gt; request.Form).Returns(formCollection);
-    A.CallTo(() =&amp;gt; request.QueryString).Returns(new NameValueCollection());
-
-    var response = A.Fake();
-    A.CallTo(() =&amp;gt; response.Write(A.Ignored)).Invokes((string x) =&amp;gt; sb.Append(x));
-
-    var mockHttpContext = A.Fake();
-    A.CallTo(() =&amp;gt; mockHttpContext.Request).Returns(request);
-    A.CallTo(() =&amp;gt; mockHttpContext.Response).Returns(response);
-
-    var controllerContext = new ControllerContext(mockHttpContext, new RouteData(), A.Fake());
-
-    var myController = new MyController()
-        {
-            ControllerContext = controllerContext
-        };
-
-    myController.Index();
-
-    Assert.Contains("fiddly", sb.ToString());
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;As we are not running this against a live web server we need to mock everything from base controller types to requests, responses and everything in between. My example initiates a bit more than is required ie. querystring and headers but hopefully it demonstrates what’s needed.&lt;/p&gt;
-
-&lt;p&gt;Firstly we create an instance of a StringBuilderthat will store the response information that we can assert against. We setup a NameValueCollection to add keys/values for posted data, we could do the same for headers etc if we wanted.&lt;/p&gt;
-
-&lt;p&gt;We then create an instance of a fake HttpRequestBase using FIE and setup all the relevant request properties.&lt;/p&gt;
-
-&lt;p&gt;We then create an instance of a fake HttpResponseBase and configure a callback that is invoked when our controller calls Response.Write. We also configure it to watch any calls to Response.Write with any string using the FIE syntax of A.Ignored, you could change it so it only looks for specific argument contents if you wanted. When the method is called it then takes the argument and adds it to the StringBuilder.&lt;/p&gt;
-
-&lt;p&gt;We then create a fake instance of HttpContextBase and assign the properties of Request and Response to the previously setup fakes.&lt;/p&gt;
-
-&lt;p&gt;We then have to create a ControllerContext and pass the fake Http context, a route collection and a fake ControllerBase which the controller under test inherits off. We then assign the controller context to an instance of the controller class we are testing.&lt;/p&gt;
-
-&lt;p&gt;We can now finally call the method under test and assert the results.&lt;/p&gt;
-
-&lt;p&gt;I would obviously recommend you put the fake setup in a factory method if you have multiple tests you class to prevent duplication. You can obviously then add header, querystring, form method arguments if you want the context populated with that kind of information.&lt;/p&gt;
-
-&lt;p&gt;Hope this helps anyone in a similar situation and provides a point of reference for the Fake It Easy project.&lt;/p&gt;
 </a10:content></item></channel></rss>

@@ -10,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="keywords" content="">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta http-equiv="last-modified" content="2013-10-01T16:28:56.4015622+01:00" />
+    <meta http-equiv="last-modified" content="2013-10-21T20:52:43.1112996+01:00" />
     <meta name="google-site-verification" content="9bvoj2jXRyykef2Tg72C0Am15YBTqDF0RgeZ84tUytE" />
         <title>Jonathan Channon Blog</title>
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700%7CCourgette' rel='stylesheet' type='text/css'>
@@ -63,6 +63,32 @@
             <div class="">
                   
 
+    <div class="post-item boxed post-detail">
+      <span class="post-label label-quotes"></span>           
+      <div class="post-title">
+        <h1><a href="/2013/04/30/mocking-httpcontext-with-fake-it-easy/">Mocking HttpContext with Fake It Easy</a></h1>
+      </div>
+      <div class="post-meta-top">
+          <span class="post-date">April 30, 2013</span> <!-- <span class="post-author">Jonathan Channon</span> -->
+          <!-- <span class="link-comments"></span> -->
+          <div class="commentcount" data-disqus-url="http://blog.jonathanchannon.com/2013/04/30/mocking-httpcontext-with-fake-it-easy/"></div>
+      </div>
+      <!-- <div class="post-image"><img src="images/temp/slider_1_1.jpg" alt=""></div> -->
+      <div class="post-descr entry">
+          <p>Lets start with the conclusion first and say “use <a href="http://nancyfx.org">Nancy</a> for your web applications and APIs” as its brilliant!</p>
+
+<p>If you want to continue reading lets crack on.</p>
+
+<p>I’m currently working on a ASP.Net MVC project and one of the controller methods writes directly to the Response, <em>eg. Response.Write(“How will I mock thee?”);</em></p>
+
+<p>Having moved over to <a href="http://xunit.codeplex.com/">xUnit</a> and <a href="https://github.com/FakeItEasy/FakeItEasy">FakeItEasy</a> recently I wanted to write a unit or integration test depending how you see it to assert against the Http Response.</p>
+
+<p>Doing this is no easy feat with MVC (with Nancy its all <a href="https://github.com/NancyFx/Nancy/wiki/Testing-your-application">done for you</a>) and you have to mock a lot of things. I’m hoping that in later releases this will be fixed because I know that ASP.Net Web API has made things a bit easier for testing (and wrote a testing library for it) so I assume the two projects will use bits of each other or their roadmap will merge.</p>
+
+
+      </div>
+      <p><a class="readmore" href="/2013/04/30/mocking-httpcontext-with-fake-it-easy/">Read more...</a></p>            
+    </div>
     <div class="post-item boxed post-detail">
       <span class="post-label label-quotes"></span>           
       <div class="post-title">
@@ -290,34 +316,6 @@ This is an &lt;a href="http://example.com/"&gt; example link&lt;/a&gt;
 
       </div>
       <p><a class="readmore" href="/2013/01/09/javascript-is-the-future-maybe/">Read more...</a></p>            
-    </div>
-    <div class="post-item boxed post-detail">
-      <span class="post-label label-quotes"></span>           
-      <div class="post-title">
-        <h1><a href="/2012/12/19/why-use-nancyfx/">Why use NancyFX?</a></h1>
-      </div>
-      <div class="post-meta-top">
-          <span class="post-date">December 19, 2012</span> <!-- <span class="post-author">Jonathan Channon</span> -->
-          <!-- <span class="link-comments"></span> -->
-          <div class="commentcount" data-disqus-url="http://blog.jonathanchannon.com/2012/12/19/why-use-nancyfx/"></div>
-      </div>
-      <!-- <div class="post-image"><img src="images/temp/slider_1_1.jpg" alt=""></div> -->
-      <div class="post-descr entry">
-          <p>When a new project comes along why should you automatically choose ASP.NET MVC? Yes, its Microsoft based so you may have more of your peers fluent already in that architecture but is there an alternative, a better alternative?</p>
-
-<p>I believe so and its called <a href="http://nancyfx.org/">NancyFX</a>. Your first reaction, what is so special about Nancy? I also believe you’ll ask what is wrong with ASP.NET MVC but maybe you should look at it differently and ask what is right with Nancy?</p>
-
-<h2>What is Nancy?</h2>
-
-<p>Nancy is a lightweight framework for building websites / services without getting in your way. It’s heavily inspired by a Ruby project called Sinatra, which happens to identify itself as not being a framework, since it doesn’t include all the plumbing of things such as an ORM, lots of configuration, etc.</p>
-
-<h2>Does it implement MVC?</h2>
-
-<p>Nancy does not force you to adhere to the model-view-controller pattern, or any other pattern. It’s nothing more than a service endpoint responding to HTTP verbs. Making it ideal for building Websites, Web Services and APIs.</p>
-
-
-      </div>
-      <p><a class="readmore" href="/2012/12/19/why-use-nancyfx/">Read more...</a></p>            
     </div>
   <!-- Pagination links -->
   <div class="text-center">
