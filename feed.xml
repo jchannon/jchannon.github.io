@@ -6,8 +6,8 @@
 
 &lt;p&gt;Anyhow here's some example Git commands to wire it all up&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;git commit -am "status change #PROJ-158 Complete"
-git commit -am "status change #PROJ-158 Complete add work 1h"
+&lt;pre&gt;&lt;code&gt;git commit -am "I fixed a massive bug #PROJ-158 Complete"
+git commit -am "I fixed a massive bug #PROJ-158 Complete add work 1h"
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The first command will update the status of YouTrack item #PROJ-158 to Complete.  The second item will do the same but also add Time Tracking information to the item in YouTrack.&lt;/p&gt;
@@ -21,8 +21,8 @@ git commit -am "status change #PROJ-158 Complete add work 1h"
 
 &lt;p&gt;Anyhow here's some example Git commands to wire it all up&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;git commit -am "status change #PROJ-158 Complete"
-git commit -am "status change #PROJ-158 Complete add work 1h"
+&lt;pre&gt;&lt;code&gt;git commit -am "I fixed a massive bug #PROJ-158 Complete"
+git commit -am "I fixed a massive bug #PROJ-158 Complete add work 1h"
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The first command will update the status of YouTrack item #PROJ-158 to Complete.  The second item will do the same but also add Time Tracking information to the item in YouTrack.&lt;/p&gt;
