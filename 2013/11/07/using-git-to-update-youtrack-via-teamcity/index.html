@@ -12,7 +12,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta http-equiv="last-modified" content="2013-11-07T13:05:31.9116287+00:00" />
     <meta name="google-site-verification" content="9bvoj2jXRyykef2Tg72C0Am15YBTqDF0RgeZ84tUytE" />
-        <title>Jonathan Channon Blog</title>
+        <title>
+    Jonathan Channon Blog - Using Git to update YouTrack via TeamCity
+</title>
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700%7CCourgette' rel='stylesheet' type='text/css'>
     <link href="/css/style.css" media="screen" rel="stylesheet">
     <link href="/css/screen.css" media="screen" rel="stylesheet">
@@ -63,15 +65,71 @@
             <div class="">
                   
 
-    <h1><a href="/category/">Other posts in the "datetime" category</a></h1>
-  
-      <div class="catboxed" style="position:relative; margin-bottom:20px;">
-        <span class="cat-label"></span>
-        <a href="/2013/04/08/using-datetime-in-c-and-sql/" title="Using DateTime in C# and SQL">Using DateTime in C# and SQL</a> <small>(April 08, 2013)</small>
-      </div>
-  
-  
 
+<div class="post-item boxed post-detail">
+    <span class="post-label label-quotes"></span>           
+    <div class="post-title">
+      <h1><a href="/2013/11/07/using-git-to-update-youtrack-via-teamcity/">Using Git to update YouTrack via TeamCity</a></h1>
+    </div>
+    <div class="post-meta-top">
+        <span class="post-date">November 07, 2013</span> <!-- <span class="post-author">Jonathan Channon</span> -->
+        <!-- <span class="link-comments">20 comments</span> -->
+        <div class="commentcount" data-disqus-url="http://blog.jonathanchannon.com/2013/11/07/using-git-to-update-youtrack-via-teamcity/"></div>
+    </div>
+    <!-- <div class="post-image"><img src="images/temp/slider_1_1.jpg" alt=""></div> -->
+    <div class="post-descr entry">
+        <p>This post is mainly a reminder for me as I keep forgetting the command in Git to integrate commits to YouTrack items.</p>
+
+<p>YouTrack uses TeamCity to get the information about the commits and then scans the commit comment for a YouTrack item id and any commands that it can apply such as item status or time spent on said item.</p>
+
+<p>There is some documentation <a href="http://confluence.jetbrains.com/display/YTD4/Executing+Commands+from+Comment+to+VCS+Commit">here</a> but its not the greatest in terms of clarity and I've spoken to <a href="https://twitter.com/hhariri">Hadi Hariri</a> from JetBrains about improving this so hopefully they're working on it.</p>
+
+<p>Anyhow here's some example Git commands to wire it all up</p>
+
+<pre><code>git commit -am "status change #PROJ-158 Complete"
+git commit -am "status change #PROJ-158 Complete add work 1h"
+</code></pre>
+
+<p>The first command will update the status of YouTrack item #PROJ-158 to Complete.  The second item will do the same but also add Time Tracking information to the item in YouTrack.</p>
+
+<p>Hope that helps, Happy Coding!</p>
+
+    </div> 
+    <div id="tagcloud">
+     <a href="/category/git"><span>git</span></a>
+     <a href="/category/team-city"><span>team city</span></a>
+     <a href="/category/youtrack"><span>youtrack</span></a>
+    </div>
+    <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <meta itemprop="name" content="Jonathan Channon">
+    </span>
+    <div id="disqus_thread"></div>
+<script>
+    var reset_disqus = function(){
+        DISQUS.reset({
+            reload: true,
+            config: function () {
+                //this.page.identifier = '';
+                this.page.url = 'http://blog.jonathanchannon.com/2013/11/07/using-git-to-update-youtrack-via-teamcity/';
+                //this.page.title = '';
+            }
+        });
+    };
+
+    var disqus_shortname = 'jonathanchannonblog';
+    var disqus_url = 'http://blog.jonathanchannon.com/2013/11/07/using-git-to-update-youtrack-via-teamcity/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+
+    window.addEventListener('orientationchange', reset_disqus);
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
             </div>
                 <!-- #content -->
          </div>
