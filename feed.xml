@@ -1,4 +1,35 @@
-<rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/11/07/using-git-to-update-youtrack-via-teamcity/</guid><link>http://blog.jonathanchannon.com/2013/11/07/using-git-to-update-youtrack-via-teamcity/</link><title>Using Git to update YouTrack via TeamCity</title><description>&lt;p&gt;This post is mainly a reminder for me as I keep forgetting the command in Git to integrate commits to YouTrack items.&lt;/p&gt;
+<rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/11/25/octopus-xml-transformation-in-services/</guid><link>http://blog.jonathanchannon.com/2013/11/25/octopus-xml-transformation-in-services/</link><title>Octopus XML Transformation in Services</title><description>&lt;p&gt;We use &lt;a href="http://octopusdeploy.com/"&gt;Octopus Deploy&lt;/a&gt; at work and its a superb tool for deploying your applications whether they be websites or *.exes.&lt;/p&gt;
+
+&lt;p&gt;One of the great things it also provides is the ability to use &lt;a href="http://msdn.microsoft.com/en-us/library/dd465326.aspx"&gt;Microsoft's Transformation&lt;/a&gt; process for config files.  However, when deploying a exe application its a bit trickier than a website.  Unfortunately the documentation doesn't mention the steps needed to get this working so read on!  &lt;/p&gt;
+
+&lt;p&gt;Typically a web application will have web.config and a web.Release.config as well as other derivations you may use.  Octopus also supports web.[Environment].config.&lt;/p&gt;
+
+</description><pubDate>Mon, 25 Nov 2013 00:00:00 Z</pubDate><a10:updated>2013-11-25T00:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;We use &lt;a href="http://octopusdeploy.com/"&gt;Octopus Deploy&lt;/a&gt; at work and its a superb tool for deploying your applications whether they be websites or *.exes.&lt;/p&gt;
+
+&lt;p&gt;One of the great things it also provides is the ability to use &lt;a href="http://msdn.microsoft.com/en-us/library/dd465326.aspx"&gt;Microsoft's Transformation&lt;/a&gt; process for config files.  However, when deploying a exe application its a bit trickier than a website.  Unfortunately the documentation doesn't mention the steps needed to get this working so read on!  &lt;/p&gt;
+
+&lt;p&gt;Typically a web application will have web.config and a web.Release.config as well as other derivations you may use.  Octopus also supports web.[Environment].config.&lt;/p&gt;
+
+&lt;!--excerpt--&gt;
+
+&lt;p&gt;In a console application you have an app.config and maybe a app.Release.config if you create one.  Deploying this via Octopus won't invoke the XML transformation.&lt;/p&gt;
+
+&lt;p&gt;The trick is to rename the app.Release.config to be the name of the final config file produced by the build along with the 'exe' extension in it and to make sure in Visual Studio you set the build to Copy Always on the MyApp.exe.Release.config file.&lt;/p&gt;
+
+&lt;p&gt;So for example if your project is called MyApp and you have an app.config and app.Release.config, open Windows Explorer and rename it to MyApp.exe.Release.config.  Visual Studio won't allow you to rename these files that are dependent on another so you now have to open up MyApp.csproj and alter the references from app.Release.config to MyApp.exe.Release.config&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;Content Include="App.config" /&amp;gt;
+&amp;lt;Content Include="MyApp.exe.Release.config" &amp;gt;
+    &amp;lt;DependentUpon&amp;gt;App.Config&amp;lt;/DependentUpon&amp;gt;
+&amp;lt;/Content&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Go into VS, Reload All when it prompts you and set the Copy to Output Directory value to Copy Always&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="http://i.imgur.com/E8Kbezh.jpg" alt="VS Property Window" /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now when you deploy Octopus should run the transformation and replace connection strings etc as you would expect.&lt;/p&gt;
+</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/11/07/using-git-to-update-youtrack-via-teamcity/</guid><link>http://blog.jonathanchannon.com/2013/11/07/using-git-to-update-youtrack-via-teamcity/</link><title>Using Git to update YouTrack via TeamCity</title><description>&lt;p&gt;This post is mainly a reminder for me as I keep forgetting the command in Git to integrate commits to YouTrack items.&lt;/p&gt;
 
 &lt;p&gt;YouTrack uses TeamCity to get the information about the commits and then scans the commit comment for a YouTrack item id and any commands that it can apply such as item status or time spent on said item.&lt;/p&gt;
 
@@ -40,7 +71,7 @@ git commit -am "I fixed a massive bug #PROJ-158 Complete add work 1h"
 
 &lt;p&gt;To get Mocha to run we need to create a new build system. To do this click Tools - Build System - New Build System and paste in the below:&lt;/p&gt;
 
-</description><pubDate>Sun, 20 Oct 2013 23:00:00 Z</pubDate><a10:updated>2013-10-20T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I spend most of my day in Visual Studio with lots of the goodies an IDE can offer.  One of them being able to run your tests from a keystroke.&lt;/p&gt;
+</description><pubDate>Mon, 21 Oct 2013 00:00:00 Z</pubDate><a10:updated>2013-10-21T00:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I spend most of my day in Visual Studio with lots of the goodies an IDE can offer.  One of them being able to run your tests from a keystroke.&lt;/p&gt;
 
 &lt;p&gt;In a bid to expand my mind I'm working on a little project that is made up of JS entirely so I've dug out &lt;a href="http://sublimetext.com"&gt;Sublime Text&lt;/a&gt;. It has lots of plugins that are very handy, especially &lt;a href="https://github.com/victorporof/Sublime-HTMLPrettify"&gt;Sublime-HTMLPrettify&lt;/a&gt; which will tidy your HTML, CSS &amp;amp; JS for you.&lt;/p&gt;
 
@@ -105,7 +136,7 @@ title: Setting up a ServiceStack Service
 &lt;p&gt;The "title" should hopefully be self explanatory!&lt;/p&gt;
 
 &lt;p&gt;You can optionally add an author and email properties to override the global config settings for example, if you wanted to allow guest author blog posts.  There is also an optional metadescription property you can use for SEO.
-</description><pubDate>Mon, 30 Sep 2013 23:00:00 Z</pubDate><a10:updated>2013-09-30T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;There are many markdown blogging engines out there such as &lt;a href="http://calepin.co/"&gt;Calepin&lt;/a&gt;, &lt;a href="http://scriptogr.am/"&gt;Scriptogram&lt;/a&gt; and even &lt;a href="http://wordpress.org/"&gt;WordPress&lt;/a&gt; allows you to write blog posts in Markdown but &lt;a href="https://github.com/Sandra/Sandra.Snow"&gt;Sandra.Snow&lt;/a&gt; tries to add something different.  Firstly, it is written in .Net and &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt;, secondly its a static blog generator and finally it supports Git deployment.&lt;/p&gt;
+</description><pubDate>Tue, 01 Oct 2013 00:00:00 Z</pubDate><a10:updated>2013-10-01T00:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;There are many markdown blogging engines out there such as &lt;a href="http://calepin.co/"&gt;Calepin&lt;/a&gt;, &lt;a href="http://scriptogr.am/"&gt;Scriptogram&lt;/a&gt; and even &lt;a href="http://wordpress.org/"&gt;WordPress&lt;/a&gt; allows you to write blog posts in Markdown but &lt;a href="https://github.com/Sandra/Sandra.Snow"&gt;Sandra.Snow&lt;/a&gt; tries to add something different.  Firstly, it is written in .Net and &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt;, secondly its a static blog generator and finally it supports Git deployment.&lt;/p&gt;
 
 &lt;p&gt;Even if you don't want to use Git deployment you can use FTP, its a great tool.  To write your blog post in Markdown you need a custom header in your file so it knows some information about your post.&lt;/p&gt;
 
@@ -266,7 +297,7 @@ public void Should_Do_Something()
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-</description><pubDate>Thu, 19 Sep 2013 23:00:00 Z</pubDate><a10:updated>2013-09-19T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I was recently writing some unit tests where I needed to test that multiple calls to an interface returned different objects.  &lt;/p&gt;
+</description><pubDate>Fri, 20 Sep 2013 00:00:00 Z</pubDate><a10:updated>2013-09-20T00:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I was recently writing some unit tests where I needed to test that multiple calls to an interface returned different objects.  &lt;/p&gt;
 
 &lt;p&gt;With &lt;a href="https://github.com/FakeItEasy/FakeItEasy"&gt;FakeItEasy&lt;/a&gt; this is easy:&lt;/p&gt;
 
@@ -383,7 +414,7 @@ public class AppTests
 &lt;p&gt;Just bear in mind this opens up your webserver so you may need to find something alternative for a live production environment.&lt;/p&gt;
 
 &lt;p&gt;Anyway you should now be able to start accepting requests via CORS when you fire up IISExpress&lt;/p&gt;
-</description><pubDate>Sun, 15 Sep 2013 23:00:00 Z</pubDate><a10:updated>2013-09-15T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I was playing around with &lt;a href="https://github.com/wordnik/swagger-ui"&gt;swagger-ui&lt;/a&gt; and was trying to point it to a local endpoint that I started with IIS Express.  I was getting an error saying that it needed the endpoint to accept Access-Control-Allow-Origin requests.&lt;/p&gt;
+</description><pubDate>Mon, 16 Sep 2013 00:00:00 Z</pubDate><a10:updated>2013-09-16T00:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I was playing around with &lt;a href="https://github.com/wordnik/swagger-ui"&gt;swagger-ui&lt;/a&gt; and was trying to point it to a local endpoint that I started with IIS Express.  I was getting an error saying that it needed the endpoint to accept Access-Control-Allow-Origin requests.&lt;/p&gt;
 
 &lt;p&gt;I went Googling and it couldn't find anything specific to IIS Express but managed to use some guidance for full blown IIS.&lt;/p&gt;
 
@@ -422,7 +453,7 @@ public class AppTests
 &lt;p&gt;I now needed to add data for my new method but realised if I added different data to the database in the constructor, I would be creating unnecessary data unrelated to the test.&lt;/p&gt;
 
 &lt;p&gt;My options were to move the constructor logic into separate methods and then call the methods in the test or have separate test classes per method in the repo.  Both were a not an ideal solution and quite frankly verbose, ugly and not best practice.
-</description><pubDate>Wed, 11 Sep 2013 23:00:00 Z</pubDate><a10:updated>2013-09-11T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;In my latest project I had kept my solution tidy with my main app project, my unit test project and integration test project. I tend to stick with a naming convention such as MainApp, MainApp.Tests.Unit &amp;amp; MainApp.Tests.Integration.&lt;/p&gt;
+</description><pubDate>Thu, 12 Sep 2013 00:00:00 Z</pubDate><a10:updated>2013-09-12T00:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;In my latest project I had kept my solution tidy with my main app project, my unit test project and integration test project. I tend to stick with a naming convention such as MainApp, MainApp.Tests.Unit &amp;amp; MainApp.Tests.Integration.&lt;/p&gt;
 
 &lt;p&gt;I had begun writing my integration tests for a repository that hits the database and returns data. Currently it was one method being called in the repository.  &lt;a href="http://xunit.codeplex.com/"&gt;xUnit&lt;/a&gt; allows you to setup any test dependencies in the constructor of your test class.  It also allows you to do any tidying up in a Dispose method if you implement IDisposable although this is &lt;a href="http://xunit.codeplex.com/wikipage?title=Comparisons&amp;amp;referringTitle=Home#note2"&gt;frowned upon&lt;/a&gt;.  However I felt for my needs I would implement this.&lt;/p&gt;
 
@@ -486,7 +517,7 @@ public void Should_return_status_ok_when_route_exists()
 
 &lt;p&gt;You set up a bootstrapper, this can be your live one or an inherited version of your live one with dependencies changed to mocks for example or use the &lt;code&gt;ConfigurableBootstrapper&lt;/code&gt;.&lt;/p&gt;
 
-</description><pubDate>Tue, 10 Sep 2013 23:00:00 Z</pubDate><a10:updated>2013-09-10T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I had the task of writing a new application recently and of course I chose &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt;.  One of the many great reasons is the testing capabilites it offers (For more on that see &lt;a href="http://www.marcusoft.net/2013/01/NancyTesting1.html"&gt;this&lt;/a&gt; great series of articles).&lt;/p&gt;
+</description><pubDate>Wed, 11 Sep 2013 00:00:00 Z</pubDate><a10:updated>2013-09-11T00:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I had the task of writing a new application recently and of course I chose &lt;a href="http://nancyfx.org"&gt;Nancy&lt;/a&gt;.  One of the many great reasons is the testing capabilites it offers (For more on that see &lt;a href="http://www.marcusoft.net/2013/01/NancyTesting1.html"&gt;this&lt;/a&gt; great series of articles).&lt;/p&gt;
 
 &lt;p&gt;The basics of a test with Nancy looks like this:&lt;/p&gt;
 
@@ -609,7 +640,7 @@ private bool BodyModel(CreateKeywordSchedule match)
 
 &lt;p&gt;It could also be argued that only "use asynchronicity in a web framework if you expect high traffic in your web application". If you only have 10 requests on a small site you're not going to benefit from asynchronous execution as there are plenty of threads available to handle your application.  If you start hitting 1000 concurrent requests (the default IIS limit) then requests will start getting queued up.  If you make your routes asynchronous then any code that is being waited on, the thread that is being used there can be released to process another request thus speeding up the performance of your app and prevent the likely hood of large queues.  I will show how simple it is to make your routes asynchronous with Nancy below.&lt;/p&gt;
 
-</description><pubDate>Fri, 23 Aug 2013 23:00:00 Z</pubDate><a10:updated>2013-08-23T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I don't know about you but all I hear is "ASYNC ALL THE THINGS!", I think this is partly down to its new and shiny and us developers love "the shiny" and partly a lot of the things we do in our applications are I/O based whether that be database or file system. &lt;/p&gt;
+</description><pubDate>Sat, 24 Aug 2013 00:00:00 Z</pubDate><a10:updated>2013-08-24T00:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I don't know about you but all I hear is "ASYNC ALL THE THINGS!", I think this is partly down to its new and shiny and us developers love "the shiny" and partly a lot of the things we do in our applications are I/O based whether that be database or file system. &lt;/p&gt;
 
 &lt;p&gt;The problem that comes with the new and shiny bandwagon is you need to understand what you're evangelising. Making asynchronous methods and executing them with no actual reason will not give your codebase any gains and could actually effect your application's performance.  There is more depth to that argument but for simplicity just remember this, only use asynchronous methods if you are doing some sort of I/O. &lt;/p&gt;
 
@@ -748,7 +779,7 @@ private bool BodyModel(CreateKeywordSchedule match)
 
 &lt;p&gt;The hipster in me is screaming saying "You should be using Sublime Text and &lt;a href="https://github.com/dannycoates/node-inspector"&gt;node-inspector&lt;/a&gt; for debugging" but to be honest I found it a bit hackety-hack and it seemed a bit odd debugging my server app in Chrome but maybe that's just something I need to get over.  JavaScript is getting a huge surge in popularity recently so its your duty as a developer to investigate this.  I want to learn and understand JS better but I always get frustrated with it after 10mins and swear that I'm never going to touch a dynamic language again, "give me a statically typed language every time with a compiler".  I have a bit of a Jekyll and Hyde situation going on that I need to overcome.&lt;/p&gt;
 
-</description><pubDate>Wed, 21 Aug 2013 23:00:00 Z</pubDate><a10:updated>2013-08-21T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I came across &lt;a href="http://www.visualnode.info/"&gt;Visual Node&lt;/a&gt; a few months ago and was excited by the looks of it.  For those that didn't click that link, it basically brings the power of Visual Studio debugging to a node.js app.  You can write your node.js app in Visual Studio, fire up the debugger by hitting F5 and use breakpoints and watches to see what's going on.  &lt;/p&gt;
+</description><pubDate>Thu, 22 Aug 2013 00:00:00 Z</pubDate><a10:updated>2013-08-22T00:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;I came across &lt;a href="http://www.visualnode.info/"&gt;Visual Node&lt;/a&gt; a few months ago and was excited by the looks of it.  For those that didn't click that link, it basically brings the power of Visual Studio debugging to a node.js app.  You can write your node.js app in Visual Studio, fire up the debugger by hitting F5 and use breakpoints and watches to see what's going on.  &lt;/p&gt;
 
 &lt;p&gt;The hipster in me is screaming saying "You should be using Sublime Text and &lt;a href="https://github.com/dannycoates/node-inspector"&gt;node-inspector&lt;/a&gt; for debugging" but to be honest I found it a bit hackety-hack and it seemed a bit odd debugging my server app in Chrome but maybe that's just something I need to get over.  JavaScript is getting a huge surge in popularity recently so its your duty as a developer to investigate this.  I want to learn and understand JS better but I always get frustrated with it after 10mins and swear that I'm never going to touch a dynamic language again, "give me a statically typed language every time with a compiler".  I have a bit of a Jekyll and Hyde situation going on that I need to overcome.&lt;/p&gt;
 
@@ -762,7 +793,7 @@ private bool BodyModel(CreateKeywordSchedule match)
 
 &lt;p&gt;Selecting this gives you a basic http server app template.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="/images/blogpostimages/projectlayout.PNG" alt="Project Layout" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://blog.jonathanchannon.com/images/blogpostimages/projectlayout.PNG" alt="Project Layout" /&gt;&lt;/p&gt;
 
 &lt;p&gt;I like that they have tried to bring a &lt;a href="http://www.nuget.org/"&gt;NuGet&lt;/a&gt; style dialog for searching packages in &lt;a href="https://npmjs.org/"&gt;NPM&lt;/a&gt;.&lt;/p&gt;
 
@@ -792,80 +823,20 @@ console.log("Server running at http://127.0.0.1:8000/");
 
 &lt;p&gt;It fires up a console app and a browser:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="/images/blogpostimages/console.png" alt="Console" /&gt;
-&lt;img src="/images/blogpostimages/helloworldbrowser.PNG" alt="Browser" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://blog.jonathanchannon.com/images/blogpostimages/console.png" alt="Console" /&gt;
+&lt;img src="http://blog.jonathanchannon.com/images/blogpostimages/helloworldbrowser.PNG" alt="Browser" /&gt;&lt;/p&gt;
 
 &lt;p&gt;I then went back to Visual Studio and put a breakpoint on the &lt;code&gt;response.end("Hello World\n");"&lt;/code&gt; to see what would happen when I refreshed my browser.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="/images/blogpostimages/debugging.png" alt="Debugging" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://blog.jonathanchannon.com/images/blogpostimages/debugging.png" alt="Debugging" /&gt;&lt;/p&gt;
 
 &lt;p&gt;It stopped on the breakpoint and gives me information about the objects in scope etc and let me step into the current line.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="/images/blogpostimages/f11.png" alt="F11" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://blog.jonathanchannon.com/images/blogpostimages/f11.png" alt="F11" /&gt;&lt;/p&gt;
 
 &lt;p&gt;That's a pretty basic hello world style of seeing what Visual Node can do but that static language side of me really likes the look of this and the potential it can bring. I believe &lt;a href="http://www.jetbrains.com/webstorm"&gt;WebStorm&lt;/a&gt; also provides node.js debugging so check that out but for pure familiarity reasons I like the look of this.&lt;/p&gt;
 
 &lt;p&gt;For a better understanding here's a video:&lt;/p&gt;
 
 &lt;iframe width="560" height="315" src="//www.youtube.com/embed/gXGLGVWWwKI" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;
-</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2013/07/03/modifying-files-within-git-history/</guid><link>http://blog.jonathanchannon.com/2013/07/03/modifying-files-within-git-history/</link><title>Modifying files within Git history</title><description>&lt;p&gt;If you have been doing code changes and committing as you go and then look back at the changes you may see something you don’t like the look of. Assuming no-one has a copy of your code changes you can go back and modify the files at a certain point in time within your commit history.&lt;/p&gt;
-
-&lt;p&gt;I use Git Bash by default but the editor sucks compared to Sublime Text so first things first lets setup the Git editor.&lt;/p&gt;
-
-&lt;p&gt;For Sublime Text run this in the command line:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git config --global core.editor "'C:/Program Files/Sublime Text 2/sublime_text.exe'"
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next up is finding the commit id you want to go back to, to edit:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git log
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Make a note of the parent commit id of the commit you want to edit.&lt;/p&gt;
-
-</description><pubDate>Tue, 02 Jul 2013 23:00:00 Z</pubDate><a10:updated>2013-07-02T23:00:00Z</a10:updated><a10:content type="text">&lt;p&gt;If you have been doing code changes and committing as you go and then look back at the changes you may see something you don’t like the look of. Assuming no-one has a copy of your code changes you can go back and modify the files at a certain point in time within your commit history.&lt;/p&gt;
-
-&lt;p&gt;I use Git Bash by default but the editor sucks compared to Sublime Text so first things first lets setup the Git editor.&lt;/p&gt;
-
-&lt;p&gt;For Sublime Text run this in the command line:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git config --global core.editor "'C:/Program Files/Sublime Text 2/sublime_text.exe'"
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next up is finding the commit id you want to go back to, to edit:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git log
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Make a note of the parent commit id of the commit you want to edit.&lt;/p&gt;
-
-&lt;!--excerpt--&gt;
-
-&lt;p&gt;Run this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git rebase --interactive 1185cb0de5d5e5b4c79f83a0c51ed06a5d22d7c4^
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will open Sublime Text and you’ll see lines similar to:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;pick d3adb33 My Commit message
-pick d5bdb67 Other Commit message
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Change “pick” to “edit” on the commit you want to modify, save and exit&lt;/p&gt;
-
-&lt;p&gt;You can then make the changes to your files and when ready run:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git commit --all --amend
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Sublime Text will open again so you can edit the commit message, just save, exit and run:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git rebase --continue
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We’re done!&lt;/p&gt;
-
-&lt;p&gt;Your previous commit has been amended and you’re back to where you were with the latest commits ready to be pushed.  &lt;/p&gt;
 </a10:content></item></channel></rss>
