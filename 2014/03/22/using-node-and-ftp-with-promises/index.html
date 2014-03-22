@@ -10,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="keywords" content="">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta http-equiv="last-modified" content="2014-03-22T10:01:04.7439429+00:00" />
+    <meta http-equiv="last-modified" content="2014-03-22T17:05:58.8141657+00:00" />
     <meta name="google-site-verification" content="9bvoj2jXRyykef2Tg72C0Am15YBTqDF0RgeZ84tUytE" />
         <title>
     Jonathan Channon Blog - Using NodeJS and FTP with Promises
@@ -192,7 +192,7 @@ var downloadFiles = function () {
 };
 </code></pre>
 
-<p>Not only is that a tad complicated but I could not for the life of me understand what the hell was happening and why it wasn't downloading all the files.  I reached out to <a href="http://twitter.com/prabir">@prabir</a> who agreed it was a tad over complicated and tried to help but recommended I take a look at Reactive Extensions, maybe I will in the future but at this point my frustration had kicked in and I wanted to give up.  I went through a mixture of emotions from frustration, which led to anger, fuming anger, denial, then apathy.  Although these emotions went by and after a couple of questions on stackoverflow that helped but didn't give the solution I explained the issue to a colleague and we both took a look.  I went through a few iterations with no luck and after a bit more reading I think we were closing in on it individually but I was beaten to it. All hail <a href="http://twitter.com/iamnerdfury">@iamnerdfury</a> who produced this:</p>
+<p>Not only is that a tad complicated but I could not for the life of me understand what the hell was happening and why it wasn't downloading all the files.  I reached out to <a href="https://twitter.com/PrabirShrestha">@PrabirShrestha</a> who agreed it was a tad over complicated and tried to help but recommended I take a look at Reactive Extensions, maybe I will in the future but at this point my frustration had kicked in and I wanted to give up.  I went through a mixture of emotions from frustration, which led to anger, fuming anger, denial, then apathy.  Although these emotions went by and after a couple of questions on stackoverflow that helped but didn't give the solution I explained the issue to a colleague and we both took a look.  I went through a few iterations with no luck and after a bit more reading I think we were closing in on it individually but I was beaten to it. All hail <a href="http://twitter.com/iamnerdfury">@iamnerdfury</a> who produced this:</p>
 
 <pre><code>var connect = function() {
     c.connect(connectionProperties);
