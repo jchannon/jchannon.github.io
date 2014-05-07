@@ -42,7 +42,7 @@
     {
         app.RequiresStatelessAuth(
               new MySecureTokenValidator(new ConfigProvider()), 
-              new RequireStatelessAuthOptions() {IgnorePaths = new List&amp;lt;string&amp;gt;(new []{"/login","/content"})})
+              new StatelessAuthOptions() {IgnorePaths = new List&amp;lt;string&amp;gt;(new []{"/login","/content"})})
             .UseNancy();
 
     }
