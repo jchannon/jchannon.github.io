@@ -10,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="keywords" content="">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta http-equiv="last-modified" content="2014-06-15T14:22:14.9541115+01:00" />
+    <meta http-equiv="last-modified" content="2014-06-19T17:34:41.4185450+01:00" />
     <meta name="google-site-verification" content="9bvoj2jXRyykef2Tg72C0Am15YBTqDF0RgeZ84tUytE" />
         <title>
     Jonathan Channon Blog - Nancy, ASP.Net vNext, VS2014 &amp; Azure
@@ -149,20 +149,19 @@ Discover-PackageSources -Url "https://www.myget.org/F/nancyfx/"
 
 <p>Now create a class called HomeModule and make it look like this:</p>
 
-<p>namespace WebApplication3
+<pre><code>namespace WebApplication3
 {
-    using Nancy;</p>
+    using Nancy;
 
-<pre><code>public class HomeModule : NancyModule
-{
-    public HomeModule()
+    public class HomeModule : NancyModule
     {
-        Get["/"] = _ =&gt; "Hello World from Nancy in ASP.Net vNext";
+        public HomeModule()
+        {
+            Get["/"] = _ =&gt; "Hello World from Nancy in ASP.Net vNext";
+        }
     }
 }
 </code></pre>
-
-<p>}</p>
 
 <p>Hit F5 and <strong><em>*boom</em>*</strong></p>
 

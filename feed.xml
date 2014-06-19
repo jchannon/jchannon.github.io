@@ -79,20 +79,19 @@ Discover-PackageSources -Url "https://www.myget.org/F/nancyfx/"
 
 &lt;p&gt;Now create a class called HomeModule and make it look like this:&lt;/p&gt;
 
-&lt;p&gt;namespace WebApplication3
+&lt;pre&gt;&lt;code&gt;namespace WebApplication3
 {
-    using Nancy;&lt;/p&gt;
+    using Nancy;
 
-&lt;pre&gt;&lt;code&gt;public class HomeModule : NancyModule
-{
-    public HomeModule()
+    public class HomeModule : NancyModule
     {
-        Get["/"] = _ =&amp;gt; "Hello World from Nancy in ASP.Net vNext";
+        public HomeModule()
+        {
+            Get["/"] = _ =&amp;gt; "Hello World from Nancy in ASP.Net vNext";
+        }
     }
 }
 &lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;}&lt;/p&gt;
 
 &lt;p&gt;Hit F5 and &lt;strong&gt;&lt;em&gt;*boom&lt;/em&gt;*&lt;/strong&gt;&lt;/p&gt;
 
