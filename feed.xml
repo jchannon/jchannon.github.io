@@ -1,4 +1,81 @@
-<rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2014/11/12/csharp-first-class-citizen-sublime-text/</guid><link>http://blog.jonathanchannon.com/2014/11/12/csharp-first-class-citizen-sublime-text/</link><a10:author><a10:name /></a10:author><category>.net</category><category>c#</category><category>community</category><category>oss</category><category>sublimetext</category><title>Microsoft Endorsing C# as a First Class Citizen in Sublime Text</title><description>&lt;p&gt;At the end of my last &lt;a href="http://blog.jonathanchannon.com/2014/08/05/nancy-aspnetvnext-osx-sublime-text/"&gt;post&lt;/a&gt; on using ASP.Net vNext with Sublime Text I briefly mentioned a &lt;a href="https://github.com/OmniSharp/omnisharp-sublime"&gt;plugin&lt;/a&gt; that aimed at giving intellisense for C# within the editor.  Well 2 months later and I'm happy to announce that intellisense works and I've added a slew of other features that will hopefully make you feel at home away from Visual Studio.&lt;/p&gt;
+<rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2014/11/24/running-gulp-in-visual-xamarin-studio/</guid><link>http://blog.jonathanchannon.com/2014/11/24/running-gulp-in-visual-xamarin-studio/</link><a10:author><a10:name /></a10:author><category>.net</category><category>gulp</category><category>javascript</category><category>visual studio</category><category>xamarin studio</category><title>Running Gulp in Visual &amp; Xamarin Studio</title><description>&lt;p&gt;I was going to write a long post explaining about all the pain I went through to get this working but then realised you probably don't really care and you just want the code!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="http://i.imgur.com/iYjnPK0.png" alt="Show the code" /&gt;&lt;/p&gt;
+
+</description><pubDate>Mon, 24 Nov 2014 00:00:00 Z</pubDate><a10:updated>2014-11-24T00:00:00Z</a10:updated><a10:content type="html">&lt;p&gt;I was going to write a long post explaining about all the pain I went through to get this working but then realised you probably don't really care and you just want the code!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="http://i.imgur.com/iYjnPK0.png" alt="Show the code" /&gt;&lt;/p&gt;
+
+&lt;!--excerpt--&gt;
+
+&lt;p&gt;Where I work we are moving to a Linux stack with .Net using Nancy &amp;amp; Postgres on the backend.  At the moment we have developers working in Windows and others on OSX using Visual Studio and Xamarin Studio respectively.  At the moment when we want to run the whole app, we build our project, drop to the command line and run gulp for the frontend stuff.  In Visual Studio we already have a post build event to copy the static assets to the bin directory (we have a self host and a IIS host) but in Xamarin Studio we don't so if that bin directory gets nuked we have to copy assets across VMs and its one big PITA.&lt;/p&gt;
+
+&lt;p&gt;So here's the code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;PostBuildEvent Condition=" '$(OS)' != 'Windows_NT' AND $(ConfigurationName) == Debug"&amp;gt;  
+
+    export PATH=$PATH:/usr/local/bin
+
+    cd $(ProjectDir)..\MyApp.Clients.AngularJS\
+
+    npm install -verbose
+
+    gulp --minify false --bincopy true --copyto "../MyApp.Hosting.Self/bin/debug/static/"
+&amp;lt;/PostBuildEvent&amp;gt;
+&amp;lt;PostBuildEvent Condition=" '$(OS)' != 'Windows_NT' AND $(ConfigurationName) == Release"&amp;gt;  
+
+    export PATH=$PATH:/usr/local/bin
+
+    cd $(ProjectDir)..\MyApp.Clients.AngularJS\
+
+    npm install -verbose
+
+    gulp --minify true --bincopy true --copyto "../MyApp.Hosting.Self/bin/debug/static/"
+&amp;lt;/PostBuildEvent&amp;gt;
+&amp;lt;PostBuildEvent Condition=" '$(OS)' == 'Windows_NT'  "&amp;gt;  
+  if $(ConfigurationName) == Debug  (
+    cd $(ProjectDir)..\MyApp.Clients.AngularJS\
+
+    npm install -verbose
+
+    cd $(ProjectDir)..\MyApp.Clients.AngularJS\
+
+    gulp --minify false --bincopy true --copyto "../MyApp.Hosting.Self/bin/debug/static/"
+  ) else (
+    cd $(ProjectDir)..\MyApp.Clients.AngularJS\
+
+    npm install -verbose
+
+    cd $(ProjectDir)..\MyApp.Clients.AngularJS\
+
+    gulp --minify true --bincopy true --copyto "../MyApp.Hosting.Self/bin/debug/static/"
+  )
+
+&amp;lt;/PostBuildEvent&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Idiosyncrasies&lt;/h2&gt;
+
+&lt;p&gt;So you can probably see some weird things going on there so I'll explain:&lt;/p&gt;
+
+&lt;h3&gt;Separate Build Events for Non-Windows&lt;/h3&gt;
+
+&lt;p&gt;I have a separate post build event for debug and release for non windows builds, I like that, seems correct to keep them separate. However, for Windows builds I have an &lt;code&gt;if&lt;/code&gt; statement.  I did get separate build events firing but then when it hit the &lt;code&gt;npm install&lt;/code&gt; line it just wouldn't work for some reason.&lt;/p&gt;
+
+&lt;h3&gt;Export PATH for Non-Windows&lt;/h3&gt;
+
+&lt;p&gt;I spent a long time trying to get gulp running on OSX. I tried it via executable shell scripts and in a post build event but it just wouldn't work but yet in the terminal all was fine.  I'm not sure if &lt;code&gt;xbuild&lt;/code&gt; gets executed as a different user or with limited privielges but I was stumped until &lt;a href="http://twitter.com/yantrio"&gt;@yantrio&lt;/a&gt; pointed me in the direction of exporting the &lt;code&gt;PATH&lt;/code&gt;.  As &lt;code&gt;Gulp&lt;/code&gt; sits in &lt;code&gt;/usr/local/bin&lt;/code&gt; I had to expose it to the post build event&lt;/p&gt;
+
+&lt;h3&gt;Changing directory&lt;/h3&gt;
+
+&lt;p&gt;In the post build events I change directory to the folder where the gulp file is located.  I did play quickly on doing it without changing directory but there were some disadvantages so I just went with this approach.  On Windows you'll see that I change directory after each command is executed.  For some reason when executed on Windows when the commands are run the current working directory is changed so you have to change it back to folder where you want to run gulp from.  On OSX &amp;amp; Linux you can set it once and all is fine.&lt;/p&gt;
+
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;So there you have it.  You're asking why not use the &lt;a href="https://visualstudiogallery.msdn.microsoft.com/8e1b4368-4afb-467a-bc13-9650572db708"&gt;Visual Studio 2013&lt;/a&gt; extension that enables running gulp from VS?  That would only work for those developers using Visual Studio and we have developers using Xamarin Studio so we wanted an across the board solution for all developers.  I know VS 2015 will have Gulp runners baked into it but I'm not sure of Xamarin Studio plans.  If you use this and get it working without a &lt;code&gt;if&lt;/code&gt; statement for Windows let me know. &lt;/p&gt;
+
+&lt;p&gt;Also check out &lt;a href="http://omnisharp.net"&gt;OmniSharp&lt;/a&gt; a little project I've been working on!&lt;/p&gt;
+</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2014/11/12/csharp-first-class-citizen-sublime-text/</guid><link>http://blog.jonathanchannon.com/2014/11/12/csharp-first-class-citizen-sublime-text/</link><a10:author><a10:name /></a10:author><category>.net</category><category>c#</category><category>community</category><category>oss</category><category>sublimetext</category><title>Microsoft Endorsing C# as a First Class Citizen in Sublime Text</title><description>&lt;p&gt;At the end of my last &lt;a href="http://blog.jonathanchannon.com/2014/08/05/nancy-aspnetvnext-osx-sublime-text/"&gt;post&lt;/a&gt; on using ASP.Net vNext with Sublime Text I briefly mentioned a &lt;a href="https://github.com/OmniSharp/omnisharp-sublime"&gt;plugin&lt;/a&gt; that aimed at giving intellisense for C# within the editor.  Well 2 months later and I'm happy to announce that intellisense works and I've added a slew of other features that will hopefully make you feel at home away from Visual Studio.&lt;/p&gt;
 
 &lt;p&gt;I discovered the plugin thanks to &lt;a href="http://twitter.com/jasonimison"&gt;Jason Imison&lt;/a&gt; but at that point there was some issues getting the intellisense working consistently because at that time I was using it with an ASP.NET vNext application which didn't have a solution file (*.sln) and the plugin was expecting that.  After speaking to Jason I found out I could change the settings so it wouldn't expect a solution file and give me the intellisense I was after in a text editor.  Eureka, it worked!  I was now on a mission to make Sublime be a first class citizen when writing C#.  Some may question why on earth would I want to edit C# in something other than Visual Studio.  I don't really want to get into that debate here but all I'll say is, it's nice to have other editor options and with Microsoft's mission to provide vNext compatibility with Mono and Visual Studio not running on OSX/Linux it makes sense to have an editor with feature rich C# support (yes I know there is Xamarin Studio but "options" people, "options").&lt;/p&gt;
 
