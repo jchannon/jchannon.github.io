@@ -58,6 +58,8 @@ http.ListenAndServe(":3000", nil)
 
 &lt;p&gt;&lt;img src="http://blog.jonathanchannon.com/images/blogpostimages/pogoauthorised.png" alt="PoGo Authorised Page" title="PoGo Authorised Page" /&gt;&lt;/p&gt;
 
+&lt;p&gt;&lt;a href="http://github.com/jchannon/pogo"&gt;Github link&lt;/a&gt;&lt;/p&gt;
+
 &lt;h3&gt;Conclusion&lt;/h3&gt;
 
 &lt;p&gt;I haven't touched on a lot of things in Go that I've learnt for example, &lt;code&gt;goroutines&lt;/code&gt; but I hope I've introduced some simple examples to demonstrate how Go can be used quite easily.  I would say that Go is quite similar to Python but obviously has its own unique features.  It is a statically typed language so has features like intellisense and error information when it compiles.  Nicely the Atom plugin gives the intellisense in the editor and also error messages when you save the documents you are working on.  I've dabbled quite a bit with Node in the past but never fully immersed myself in the community because I always had the day job of C# needing my attention and that still applies today.  However, the company I work for deploys their product on Linux using Mono and so I am getting more involved in Linux and I think its pretty clear that Linux has won the deployment story so much so Microsoft are making ASPNet5 run on Linux and the number of tools on Linux vs Windows is considerably highly so with that I think its important to learn a language that is a first class citizen on that platform.  Starting afresh in a new community is daunting as you are starting from scratch but I'm at a point where I'd like to get involved with new people and learn a new language that is a first class citizen on Linux.  The problem I have is making the time to make this happen!&lt;/p&gt;
