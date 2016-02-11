@@ -106,7 +106,7 @@ var serializer = new XmlSerializer(typeof(MyObject), new XmlRootAttribute("rootN
 var obj = (MyObject)xml.Deserialize(stream);                             
 </code></pre>
 
-<p>So did you spot it? Clue : Its not the fact that the memorystream or streamreader isn't withing a <code>using</code> statement (although that was fixed).</p>
+<p>So did you spot it? Clue : Its not the fact that the memorystream or streamreader isn't within a <code>using</code> statement (although that was fixed).</p>
 
 <p>From the dotMemory data it said it was the <code>XmlSerializer</code> constructor.  I had a look at that object and there was no <code>Dispose</code> method so decided I would create a static instance of it at the top of the class to save recreating it every time.</p>
 
