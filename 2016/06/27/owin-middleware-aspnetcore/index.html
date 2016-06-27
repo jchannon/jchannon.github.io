@@ -13,7 +13,7 @@
     <meta http-equiv="last-modified" content="2016-06-27T17:59:07.8477088+01:00" />
     <meta name="google-site-verification" content="9bvoj2jXRyykef2Tg72C0Am15YBTqDF0RgeZ84tUytE" />
         <title>
-    Jonathan Channon Blog - Profiling a CoreCLR application with dotMemory
+    Jonathan Channon Blog - Porting OWIN middleware to ASP.Net Core
 </title>
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700%7CCourgette' rel='stylesheet' type='text/css'>
     <link href="/css/style.css" media="screen" rel="stylesheet">
@@ -69,59 +69,107 @@
 <div class="post-item boxed post-detail">
     <span class="post-label label-quotes"></span>           
     <div class="post-title">
-      <h1><a href="/2016/02/11/profiling-coreclr-application/">Profiling a CoreCLR application with dotMemory</a></h1>
+      <h1><a href="/2016/06/27/owin-middleware-aspnetcore/">Porting OWIN middleware to ASP.Net Core</a></h1>
     </div>
     <div class="post-meta-top">
-        <span class="post-date">February 11, 2016</span> <!-- <span class="post-author">Jonathan Channon</span> -->
+        <span class="post-date">June 27, 2016</span> <!-- <span class="post-author">Jonathan Channon</span> -->
         <!-- <span class="link-comments">20 comments</span> -->
-        <div class="commentcount" data-disqus-url="http://blog.jonathanchannon.com/2016/02/11/profiling-coreclr-application/"></div>
+        <div class="commentcount" data-disqus-url="http://blog.jonathanchannon.com/2016/06/27/owin-middleware-aspnetcore/"></div>
     </div>
     <!-- <div class="post-image"><img src="images/temp/slider_1_1.jpg" alt=""></div> -->
     <div class="post-descr entry">
-        <p>I had ported an application over to CoreCLR (that's a whole other blog post), along with my colleague <a href="http://twitter.com/yantrio">James Humphries</a> put it in a docker image and sat back and watched it do its thing.  After 6 hours of running the docker container had crashed.  Ah nuts we thought,  so pulled up the logs from docker and the last line looked like this <code>2016-02-10T20:18:31.728783069Z Killed</code>.  I'm pretty sure when you have a log entry with <code>Killed</code> in it, things can't be good. To the interweb...</p>
+        <p>In our application at work we make use of various middleware and as we are making everything run on .Net Core the time has come to port said middleware to .Net Core.  If you don't already know ASP.Net Core has a bridge that allows you to use OWIN components in an ASP.Net Core application.  This will convert the HttpContext into a OWIN environment dictionary on input and then back again on output.</p>
 
-<p>I opened up the CoreFX repository on Github to search for the term <code>Killed</code> and there were 2 comments but nothing that was logged out anywhere.  I then Googled for docker and killed and there was an entry that someone else had spotted on their container and the feedback was essentially it was probably out of memory.</p>
+<p>Lets take an example of some middleware</p>
 
-<!--excerpt-->
+<pre><code>public class MyMiddleware
+{
+    private readonly Func&lt;IDictionary&lt;string, object&gt;, Task&gt; nextFunc;
+    private readonly OwinUserMiddlewareOptions options;
 
-<p>I had spotted when I was debugging the appliation that memory usage was creeping up relatively slowly but assumed all would be ok when garbage collection kicked in.  Well it seems its true what they say about assumptions as running it for 6 hours caused the container to be killed.  I had mentioned to <a href="http://twitter.com/citizenmatt">Matt Ellis</a>, he of Jetbrains fame, a few months ago that having profiling tools such as dotMemory &amp; dotTrace would be awesome for apps running on Linux.  Last I heard there may be plans to have a remote agent that could run on Linux and this would send the info back to dotMemory which would run on Windows as its all in WPF I believe.  Anyhow he pointed me to a blog post JB had done.  This illustrated dotMemory profiling a <code>*.exe</code> that had been built for CoreCLR but I wanted to do it from Visual Studio and not have to produce a binary.  Remeber CoreCLR apps don't produce binaries unless you explicitly tell dnx/dotnet cli to do so.  Anyhow long story short, we couldn't get VS to launch the startup project and monitor my app.  I assume they will solve this issue in the long run.</p>
+    public OwinUserMiddleware(Func&lt;IDictionary&lt;string, object&gt;, Task&gt; nextFunc, MyMiddlewareOptions options)
+    {
+        this.options = options;
+        this.nextFunc = nextFunc;
+    }
 
-<p>To get it working, we opened dotMemory and told it to profile a standalone application.  That application was dnx.exe.   Depending on your runtime target on Windows this executable will either be in <code>C:\Program Files\DNX\runtimes</code> or <code>C:\Users\[USERNAME]\.dnx\runtimes</code>.  The next thing to do is click the Advanced option.  Here you can enter any arguments which in this case it will be the command you use in <code>project.json</code> to start your application.  The final option you have is the working directory.  For me this was where the source code was.  So you should have something looking like this:</p>
+    public Task Invoke(IDictionary&lt;string, object&gt; environment)
+    {
+        //Everything is awesome
+        return nextFunc(environment);
+    }
+}
 
-<p><img src="/images/blogpostimages/dotmemoryrun.png" alt="dotMemory Usage" /></p>
-
-<p>Once you click Run it will start you application up and begin doing its thing.  What we did was to create a snapshot as soon as the app seemed to have started up, wait 60secs, take another snapshot, wait 120 seconds and repeat.  You can then compare the snapshots by selecting the snapshots checkbox and then clicking compare.  You can then see the differences.</p>
-
-<p><img src="/images/blogpostimages/dotmemorysnapshotselect.png" alt="dotMemory Snapshots" />
-<img src="/images/blogpostimages/dotmemorysnapshot.png" alt="dotMemory Differences" />
-<img src="/images/blogpostimages/dotmemorydiff.png" alt="dotMemory Drilldown" /></p>
-
-<p>On the comparison I was a bit confused with all this information and fumbled around for a bit but we came across the Back Traces option and then picked the object with the largest amount of allocated bytes and drilled down until we saw something that might have been in my code.  As we drilled down and saw system classes we knew roughly where in the app it would be until we finally hit the class and method name.</p>
-
-<p>Now being a guy on the cutting edge I knew the issue I had was this new piece of technology called XML, you should try it.  We looked in the code and found it was doing this, which was getting called every second.</p>
-
-<pre><code>var stream = new MemoryStream(Encoding.UTF8.GetBytes(myXml)));
-var sr = new StreamReader(stream));
-var serializer = new XmlSerializer(typeof(MyObject), new XmlRootAttribute("rootNode"));
-var obj = (MyObject)xml.Deserialize(stream);                             
+public static class MyMiddlewareExtensions
+{
+    public static IAppBuilder UseMyMiddleware(this IAppBuilder app, MyMiddlewareOptions options = null)
+    {
+        return app.Use(typeof(MyMiddleware), options);
+    }
+}
 </code></pre>
 
-<p>So did you spot it? Clue : Its not the fact that the memorystream or streamreader isn't within a <code>using</code> statement (although that was fixed).</p>
+<p><!--excerpt-->
+Here we see some middleware and an extension so it can be used in an application that uses OWIN.  This would be called in most commonly in a <code>Startup.cs</code> file like so:</p>
 
-<p>From the dotMemory data it said it was the <code>XmlSerializer</code> constructor.  I had a look at that object and there was no <code>Dispose</code> method so decided I would create a static instance of it at the top of the class to save recreating it every time.</p>
+<pre><code>public void Configuration(IAppBuilder app)
+{
+    app.UseMyMiddleware(new MyMiddlewareOptions());  
+}
+</code></pre>
 
-<p>I made the changes, put them into a new docker image and watched the memory usage of my app with <a href="https://t.co/gR1uTzKCwq">cAdvisor</a> and bingo, rock solid and stable memory usage!</p>
+<p>As I said earlier, ASP.Net Core has a bridge to use OWIN components and as long as your middleware can return a <code>MidFunc</code> there is very little required for you to do however if you take the example above there is a tiny bit more to do.</p>
 
-<p>After a quick Google just out of curiosity, I found the same exact issue on Stackoverflow and luckily the answer was what we had decided to do with the static instance.  Basically <code>XmlSerializer</code> uses assembly generation and they cannot be collected hence the memory issues we saw.</p>
+<h2>ASP.Net Core Startup.cs</h2>
 
-<p>Anyway hope that helps you on the path to profiling your CoreCLR app and hopefully things with Jetbrains will improve so we can profile apps running on Linux.</p>
+<pre><code>public void Configure(IApplicationBuilder app)
+{
+    //Use the ASP.Net Core OWIN bridge
+    app.UseOwin(x.Invoke(MyMiddleware.ReturnAppFunc()));  
+}
+</code></pre>
+
+<p>Above shows how to use the OWIN bridge if your middleware can already return a <code>MidFunc</code>.  For those unclear here's what that looks like <code>System.Func&lt;System.Func&lt;System.Collections.Generic.IDictionary&lt;string, object&gt;, System.Threading.Tasks.Task&gt;, System.Func&lt;System.Collections.Generic.IDictionary&lt;string, object&gt;, System.Threading.Tasks.Task&gt;&gt;;</code></p>
+
+<p>Using our sample middleware above the extension class would now have to look like this:</p>
+
+<pre><code>using System;
+
+using MidFunc = System.Func&lt;System.Func&lt;System.Collections.Generic.IDictionary&lt;string, object&gt;,
+        System.Threading.Tasks.Task&gt;, System.Func&lt;System.Collections.Generic.IDictionary&lt;string, object&gt;,
+        System.Threading.Tasks.Task&gt;&gt;;
+
+public static class MyMiddlewareExtensions
+{
+    public static MidFunc UseMyMiddleware(this Action&lt;MidFunc&gt; builder, MyMiddlewareOptions options = null)
+    {
+        return next =&gt; async environment =&gt; new MyMiddleware(next, options).Invoke(environment);
+    }
+}
+</code></pre>
+
+<p>This can now be used in a ASP.NET Core Startup class like so:</p>
+
+<pre><code>public void Configure(IApplicationBuilder app)
+{
+  //Use the ASP.Net Core OWIN bridge
+  app.UseOwin(x =&gt; 
+  {
+      x.UseMyMiddleware(new MyMiddlewareOptions());
+      x.UseNancy();
+  });  
+}
+</code></pre>
+
+<p>Tada!  Also note that I only call <code>UseOwin</code> once, I don't need to call it for every OWIN middleware I have.  Also just to be clear, if you want your middleware to run on .Net Core you will still have to make sure your middleware is compatible.  The above shows  how you came make your OWIN middleware run in ASP.Net Core pipeline even if its on .Net 4.5 but if it is compatible with .Net Core you can target that from your application and bingo! That is exactly what I have done with my middleware. </p>
+
+<p>Happy coding!</p>
 
     </div> 
     <div id="tagcloud">
-     <a href="/category/.net"><span>.net</span></a>
-     <a href="/category/c"><span>c#</span></a>
-     <a href="/category/coreclr"><span>coreclr</span></a>
-     <a href="/category/oss"><span>oss</span></a>
+     <a href="/category/asp.net"><span>ASP.Net</span></a>
+     <a href="/category/oss"><span>OSS</span></a>
+     <a href="/category/owin"><span>OWIN</span></a>
     </div>
     <span itemprop="author" itemscope itemtype="http://schema.org/Person">
         <meta itemprop="name" content="Jonathan Channon">
@@ -133,14 +181,14 @@ var obj = (MyObject)xml.Deserialize(stream);
             reload: true,
             config: function () {
                 //this.page.identifier = '';
-                this.page.url = 'http://blog.jonathanchannon.com/2016/02/11/profiling-coreclr-application/';
+                this.page.url = 'http://blog.jonathanchannon.com/2016/06/27/owin-middleware-aspnetcore/';
                 //this.page.title = '';
             }
         });
     };
 
     var disqus_shortname = 'jonathanchannonblog';
-    var disqus_url = 'http://blog.jonathanchannon.com/2016/02/11/profiling-coreclr-application/';
+    var disqus_url = 'http://blog.jonathanchannon.com/2016/06/27/owin-middleware-aspnetcore/';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

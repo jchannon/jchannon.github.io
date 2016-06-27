@@ -1,4 +1,121 @@
-<rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2016/04/28/what-is-a-hypermedia-client/</guid><link>http://blog.jonathanchannon.com/2016/04/28/what-is-a-hypermedia-client/</link><a10:author><a10:name /></a10:author><category>hypermedia</category><category>REST</category><title>What is a Hypermedia client?</title><description>&lt;p&gt;I've been interested in Hypermedia for quite a while.  I bugged &lt;a href="http://twitter.com/darrelmiller"&gt;Darrel Miller&lt;/a&gt; and &lt;a href="http://twitter.com/gblock"&gt;Glenn Block&lt;/a&gt; (Glenn Miller) so much so they created a &lt;a href="https://www.youtube.com/playlist?list=PLbc9sDUxHqX60XJaTnNnKvI2mRighInDW"&gt;YouTube show&lt;/a&gt; called "In The Mood for HTTP".  I bought their book &lt;a href="http://webapibook.net/"&gt;"Designing Evolvable Web APIs with ASP.NET"&lt;/a&gt;, I am waiting for &lt;a href="http://shop.oreilly.com/product/0636920037958.do"&gt;"RESTful Web Clients Enabling Reuse Through Hypermedia"&lt;/a&gt; by &lt;a href="http://twitter.com/mamund"&gt;Mike Amundsen&lt;/a&gt;, I have &lt;a href="http://blog.jonathanchannon.com/2015/08/07/hypermedia-and-nancyfx/index.html"&gt;written&lt;/a&gt; about how to return different media types with NancyFX and I am looking at going to &lt;a href="http://2016.uk.restfest.org/"&gt;restfest.org&lt;/a&gt; in Edinburgh this year, a REST conference.  &lt;/p&gt;
+<rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Jonathan Channon Blog</title><link>http://blog.jonathanchannon.com/feed.xml</link><description>Jonathan Channon Blog</description><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2016/06/27/owin-middleware-aspnetcore/</guid><link>http://blog.jonathanchannon.com/2016/06/27/owin-middleware-aspnetcore/</link><a10:author><a10:name /></a10:author><category>ASP.Net</category><category>OSS</category><category>OWIN</category><title>Porting OWIN middleware to ASP.Net Core</title><description>&lt;p&gt;In our application at work we make use of various middleware and as we are making everything run on .Net Core the time has come to port said middleware to .Net Core.  If you don't already know ASP.Net Core has a bridge that allows you to use OWIN components in an ASP.Net Core application.  This will convert the HttpContext into a OWIN environment dictionary on input and then back again on output.&lt;/p&gt;
+
+&lt;p&gt;Lets take an example of some middleware&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class MyMiddleware
+{
+    private readonly Func&amp;lt;IDictionary&amp;lt;string, object&amp;gt;, Task&amp;gt; nextFunc;
+    private readonly OwinUserMiddlewareOptions options;
+
+    public OwinUserMiddleware(Func&amp;lt;IDictionary&amp;lt;string, object&amp;gt;, Task&amp;gt; nextFunc, MyMiddlewareOptions options)
+    {
+        this.options = options;
+        this.nextFunc = nextFunc;
+    }
+
+    public Task Invoke(IDictionary&amp;lt;string, object&amp;gt; environment)
+    {
+        //Everything is awesome
+        return nextFunc(environment);
+    }
+}
+
+public static class MyMiddlewareExtensions
+{
+    public static IAppBuilder UseMyMiddleware(this IAppBuilder app, MyMiddlewareOptions options = null)
+    {
+        return app.Use(typeof(MyMiddleware), options);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;</description><pubDate>Sun, 26 Jun 2016 23:00:00 Z</pubDate><a10:updated>2016-06-26T23:00:00Z</a10:updated><a10:content type="html">&lt;p&gt;In our application at work we make use of various middleware and as we are making everything run on .Net Core the time has come to port said middleware to .Net Core.  If you don't already know ASP.Net Core has a bridge that allows you to use OWIN components in an ASP.Net Core application.  This will convert the HttpContext into a OWIN environment dictionary on input and then back again on output.&lt;/p&gt;
+
+&lt;p&gt;Lets take an example of some middleware&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class MyMiddleware
+{
+    private readonly Func&amp;lt;IDictionary&amp;lt;string, object&amp;gt;, Task&amp;gt; nextFunc;
+    private readonly OwinUserMiddlewareOptions options;
+
+    public OwinUserMiddleware(Func&amp;lt;IDictionary&amp;lt;string, object&amp;gt;, Task&amp;gt; nextFunc, MyMiddlewareOptions options)
+    {
+        this.options = options;
+        this.nextFunc = nextFunc;
+    }
+
+    public Task Invoke(IDictionary&amp;lt;string, object&amp;gt; environment)
+    {
+        //Everything is awesome
+        return nextFunc(environment);
+    }
+}
+
+public static class MyMiddlewareExtensions
+{
+    public static IAppBuilder UseMyMiddleware(this IAppBuilder app, MyMiddlewareOptions options = null)
+    {
+        return app.Use(typeof(MyMiddleware), options);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;!--excerpt--&gt;
+Here we see some middleware and an extension so it can be used in an application that uses OWIN.  This would be called in most commonly in a &lt;code&gt;Startup.cs&lt;/code&gt; file like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public void Configuration(IAppBuilder app)
+{
+    app.UseMyMiddleware(new MyMiddlewareOptions());  
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As I said earlier, ASP.Net Core has a bridge to use OWIN components and as long as your middleware can return a &lt;code&gt;MidFunc&lt;/code&gt; there is very little required for you to do however if you take the example above there is a tiny bit more to do.&lt;/p&gt;
+
+&lt;h2&gt;ASP.Net Core Startup.cs&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;public void Configure(IApplicationBuilder app)
+{
+    //Use the ASP.Net Core OWIN bridge
+    app.UseOwin(x.Invoke(MyMiddleware.ReturnAppFunc()));  
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Above shows how to use the OWIN bridge if your middleware can already return a &lt;code&gt;MidFunc&lt;/code&gt;.  For those unclear here's what that looks like &lt;code&gt;System.Func&amp;lt;System.Func&amp;lt;System.Collections.Generic.IDictionary&amp;lt;string, object&amp;gt;, System.Threading.Tasks.Task&amp;gt;, System.Func&amp;lt;System.Collections.Generic.IDictionary&amp;lt;string, object&amp;gt;, System.Threading.Tasks.Task&amp;gt;&amp;gt;;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Using our sample middleware above the extension class would now have to look like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;using System;
+
+using MidFunc = System.Func&amp;lt;System.Func&amp;lt;System.Collections.Generic.IDictionary&amp;lt;string, object&amp;gt;,
+        System.Threading.Tasks.Task&amp;gt;, System.Func&amp;lt;System.Collections.Generic.IDictionary&amp;lt;string, object&amp;gt;,
+        System.Threading.Tasks.Task&amp;gt;&amp;gt;;
+
+public static class MyMiddlewareExtensions
+{
+    public static MidFunc UseMyMiddleware(this Action&amp;lt;MidFunc&amp;gt; builder, MyMiddlewareOptions options = null)
+    {
+        return next =&amp;gt; async environment =&amp;gt; new MyMiddleware(next, options).Invoke(environment);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This can now be used in a ASP.NET Core Startup class like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public void Configure(IApplicationBuilder app)
+{
+  //Use the ASP.Net Core OWIN bridge
+  app.UseOwin(x =&amp;gt; 
+  {
+      x.UseMyMiddleware(new MyMiddlewareOptions());
+      x.UseNancy();
+  });  
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Tada!  Also note that I only call &lt;code&gt;UseOwin&lt;/code&gt; once, I don't need to call it for every OWIN middleware I have.  Also just to be clear, if you want your middleware to run on .Net Core you will still have to make sure your middleware is compatible.  The above shows  how you came make your OWIN middleware run in ASP.Net Core pipeline even if its on .Net 4.5 but if it is compatible with .Net Core you can target that from your application and bingo! That is exactly what I have done with my middleware. &lt;/p&gt;
+
+&lt;p&gt;Happy coding!&lt;/p&gt;
+</a10:content></item><item><guid isPermaLink="true">http://blog.jonathanchannon.com/2016/04/28/what-is-a-hypermedia-client/</guid><link>http://blog.jonathanchannon.com/2016/04/28/what-is-a-hypermedia-client/</link><a10:author><a10:name /></a10:author><category>hypermedia</category><category>REST</category><title>What is a Hypermedia client?</title><description>&lt;p&gt;I've been interested in Hypermedia for quite a while.  I bugged &lt;a href="http://twitter.com/darrelmiller"&gt;Darrel Miller&lt;/a&gt; and &lt;a href="http://twitter.com/gblock"&gt;Glenn Block&lt;/a&gt; (Glenn Miller) so much so they created a &lt;a href="https://www.youtube.com/playlist?list=PLbc9sDUxHqX60XJaTnNnKvI2mRighInDW"&gt;YouTube show&lt;/a&gt; called "In The Mood for HTTP".  I bought their book &lt;a href="http://webapibook.net/"&gt;"Designing Evolvable Web APIs with ASP.NET"&lt;/a&gt;, I am waiting for &lt;a href="http://shop.oreilly.com/product/0636920037958.do"&gt;"RESTful Web Clients Enabling Reuse Through Hypermedia"&lt;/a&gt; by &lt;a href="http://twitter.com/mamund"&gt;Mike Amundsen&lt;/a&gt;, I have &lt;a href="http://blog.jonathanchannon.com/2015/08/07/hypermedia-and-nancyfx/index.html"&gt;written&lt;/a&gt; about how to return different media types with NancyFX and I am looking at going to &lt;a href="http://2016.uk.restfest.org/"&gt;restfest.org&lt;/a&gt; in Edinburgh this year, a REST conference.  &lt;/p&gt;
 
 &lt;p&gt;The one thing that I have always discussed with Glenn Miller is that there seems, or from my perception, that there is a lot of emphasis on the server returning media types(HAL,Siren,JSON-LD, Collection+Json) and very little information about hypermedia clients.  The information that I have come across which is very little, again coulkd be due to my lack of Google-fu, seems to generate a mis-conception.  The mis-conception I have come across is that if you have an API that returns hypermedia then your client should be able to magically work with it.  It should know everything that is required to browse the API and discover its way around.  I never quite grasped how that was supposed to happen and was serioulsy confused.  I had seen a video that showed when the server returned its responses, using Javascript it would loop over all the properties in the payload and then display them in a HTML page.  The emphasis was that if new bits of data were added then they would appear magically in the UI.  That seemed like a nice feature but I still didn't quite get how it went from hitting the root of the API to finding its way into the guts of it.  The server would return links in the payload with "rels" and I was baffled how this magic client knew what to do with a rel or even how it knew what rels it would return.&lt;br /&gt;
 </description><pubDate>Wed, 27 Apr 2016 23:00:00 Z</pubDate><a10:updated>2016-04-27T23:00:00Z</a10:updated><a10:content type="html">&lt;p&gt;I've been interested in Hypermedia for quite a while.  I bugged &lt;a href="http://twitter.com/darrelmiller"&gt;Darrel Miller&lt;/a&gt; and &lt;a href="http://twitter.com/gblock"&gt;Glenn Block&lt;/a&gt; (Glenn Miller) so much so they created a &lt;a href="https://www.youtube.com/playlist?list=PLbc9sDUxHqX60XJaTnNnKvI2mRighInDW"&gt;YouTube show&lt;/a&gt; called "In The Mood for HTTP".  I bought their book &lt;a href="http://webapibook.net/"&gt;"Designing Evolvable Web APIs with ASP.NET"&lt;/a&gt;, I am waiting for &lt;a href="http://shop.oreilly.com/product/0636920037958.do"&gt;"RESTful Web Clients Enabling Reuse Through Hypermedia"&lt;/a&gt; by &lt;a href="http://twitter.com/mamund"&gt;Mike Amundsen&lt;/a&gt;, I have &lt;a href="http://blog.jonathanchannon.com/2015/08/07/hypermedia-and-nancyfx/index.html"&gt;written&lt;/a&gt; about how to return different media types with NancyFX and I am looking at going to &lt;a href="http://2016.uk.restfest.org/"&gt;restfest.org&lt;/a&gt; in Edinburgh this year, a REST conference.  &lt;/p&gt;
