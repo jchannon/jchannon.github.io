@@ -92,9 +92,10 @@ using MidFunc = System.Func&amp;lt;System.Func&amp;lt;System.Collections.Generic
 
 public static class MyMiddlewareExtensions
 {
-    public static MidFunc UseMyMiddleware(this Action&amp;lt;MidFunc&amp;gt; builder, MyMiddlewareOptions options = null)
+    public static Action&amp;lt;MidFunc&amp;gt; UseMyMiddleware(this Action&amp;lt;MidFunc&amp;gt; builder, MyMiddlewareOptions options = null)
     {
-        return next =&amp;gt; environment =&amp;gt; new MyMiddleware(next, options).Invoke(environment);
+        builder(next =&amp;gt; new MyMiddleware(next, options).Invoke);
+        return builder;
     }
 }
 &lt;/code&gt;&lt;/pre&gt;
