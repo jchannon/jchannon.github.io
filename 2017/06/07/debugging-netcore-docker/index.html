@@ -13,7 +13,7 @@
     <meta http-equiv="last-modified" content="2017-06-07T15:49:30.9638585+01:00" />
     <meta name="google-site-verification" content="9bvoj2jXRyykef2Tg72C0Am15YBTqDF0RgeZ84tUytE" />
         <title>
-    Jonathan Channon Blog - Porting OWIN middleware to ASP.Net Core
+    Jonathan Channon Blog - Debugging .Net Core apps inside Docker container with VSCode
 </title>
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700%7CCourgette' rel='stylesheet' type='text/css'>
     <link href="/css/style.css" media="screen" rel="stylesheet">
@@ -69,108 +69,89 @@
 <div class="post-item boxed post-detail">
     <span class="post-label label-quotes"></span>           
     <div class="post-title">
-      <h1><a href="/2016/06/27/porting-owin-middleware-aspnetcore/">Porting OWIN middleware to ASP.Net Core</a></h1>
+      <h1><a href="/2017/06/07/debugging-netcore-docker/">Debugging .Net Core apps inside Docker container with VSCode</a></h1>
     </div>
     <div class="post-meta-top">
-        <span class="post-date">June 27, 2016</span> <!-- <span class="post-author">Jonathan Channon</span> -->
+        <span class="post-date">June 07, 2017</span> <!-- <span class="post-author">Jonathan Channon</span> -->
         <!-- <span class="link-comments">20 comments</span> -->
-        <div class="commentcount" data-disqus-url="http://blog.jonathanchannon.com/2016/06/27/porting-owin-middleware-aspnetcore/"></div>
+        <div class="commentcount" data-disqus-url="http://blog.jonathanchannon.com/2017/06/07/debugging-netcore-docker/"></div>
     </div>
     <!-- <div class="post-image"><img src="images/temp/slider_1_1.jpg" alt=""></div> -->
     <div class="post-descr entry">
-        <p>In our application at work we make use of various middleware and as we are making everything run on .Net Core the time has come to port said middleware to .Net Core.  If you don't already know ASP.Net Core has a bridge that allows you to use OWIN components in an ASP.Net Core application.  This will convert the HttpContext into a OWIN environment dictionary on input and then back again on output.</p>
+        <p>So by now using .Net Core on Linux is old news, everyone is doing it and deploying their production apps on Kubernetes to reach peak "I can scale" points.  However, one thing that can get tricky is when you have a requirement to debug an application in a container.  I believe VS on Windows and VS for Mac has some sort of capability to do that (I have no idea what it does underneath but hey who cares I can right click debug right!?) but the information about doing this in VSCode is a bit sketchy.  I tend to use VSCode on OSX the most so I wanted to see how I could do this.</p>
 
-<p>Lets take an example of some middleware</p>
+<p>For demonstration purposes lets take a very simple application and we are going to publish it as a self contained application ie/one that has all the runtime and application binaries outputted so you don't have to install dotnet in a container.</p>
 
-<pre><code>public class MyMiddleware
-{
-    private readonly Func&lt;IDictionary&lt;string, object&gt;, Task&gt; nextFunc;
-    private readonly OwinUserMiddlewareOptions options;
+<p>To be able to debug that application we are going to need VSDBG(the .Net Core command line debugger) inside the container.</p>
 
-    public OwinUserMiddleware(Func&lt;IDictionary&lt;string, object&gt;, Task&gt; nextFunc, MyMiddlewareOptions options)
-    {
-        this.options = options;
-        this.nextFunc = nextFunc;
-    }
+<p><code>curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg</code></p>
 
-    public Task Invoke(IDictionary&lt;string, object&gt; environment)
-    {
-        //Everything is awesome
-        return nextFunc(environment);
-    }
-}
+<p>We are also going to need to append the launch.json for VSCode in your project's root to have the below:</p>
 
-public static class MyMiddlewareExtensions
-{
-    public static IAppBuilder UseMyMiddleware(this IAppBuilder app, MyMiddlewareOptions options = null)
-    {
-        return app.Use(typeof(MyMiddleware), options);
-    }
+<pre><code>{
+    "name": ".NET Core Remote Attach",
+    "type": "coreclr",
+    "request": "attach",
+    "processId": "${command:pickRemoteProcess}",
+    "pipeTransport": {
+        "pipeProgram": "bash",
+        "pipeArgs": [ "-c", "docker exec -i json ${debuggerCommand}" ],
+        "debuggerPath": "/root/vsdbg/vsdbg",
+        "pipeCwd": "${workspaceRoot}",
+        "quoteArgs": true
+    },
+    "sourceFileMap": {
+        "/Users/jonathan/Projects/jsonfile": "${workspaceRoot}"
+    },
+    "justMyCode": true
 }
 </code></pre>
 
-<p><!--excerpt-->
-Here we see some middleware and an extension so it can be used in an application that uses OWIN.  This would be called in most commonly in a <code>Startup.cs</code> file like so:</p>
+<!--excerpt-->
 
-<pre><code>public void Configuration(IAppBuilder app)
-{
-    app.UseMyMiddleware(new MyMiddlewareOptions());  
-}
+<p>They key things to note are the <code>pipeArgs</code> and <code>sourceFileMap</code>. Where it says <code>json</code>, under <code>pipeArgs</code> this will need to be replaced the name of the container that you are trying to debug.  The <code>sourceFileMap</code> is a mapping between where it was compiled on your machine and where it is in VSCode.  The rest of the properties are explained <a href="https://github.com/OmniSharp/omnisharp-vscode/wiki/Attaching-to-remote-processes#configuring-launchjson">here</a> </p>
+
+<p>The final Dockerfile looks like this:</p>
+
+<pre><code>FROM microsoft/dotnet:1.1-runtime-deps
+
+RUN apt-get update
+
+RUN apt-get install curl unzip
+
+RUN curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg
+
+COPY ./publish /app
+
+WORKDIR /app
+
+ENTRYPOINT ./jsonfile
 </code></pre>
 
-<p>As I said earlier, ASP.Net Core has a bridge to use OWIN components and as long as your middleware can return a <code>MidFunc</code> there is very little required for you to do however if you take the example above there is a tiny bit more to do.</p>
+<p>So we're ready to go with the following steps:</p>
 
-<h2>ASP.Net Core Startup.cs</h2>
+<p>So we're ready to go, the steps are:</p>
 
-<pre><code>public void Configure(IApplicationBuilder app)
-{
-    //Use the ASP.Net Core OWIN bridge
-    app.UseOwin(x =&gt; x.Invoke(MyMiddleware.ReturnAppFunc()));  
-}
-</code></pre>
+<p><code>dotnet publish -c Debug -f netcoreapp1.1 -r debian.8-x64 -o ./publish</code></p>
 
-<p>Above shows how to use the OWIN bridge if your middleware can already return a <code>MidFunc</code>.  For those unclear here's what that looks like <code>System.Func&lt;System.Func&lt;System.Collections.Generic.IDictionary&lt;string, object&gt;, System.Threading.Tasks.Task&gt;, System.Func&lt;System.Collections.Generic.IDictionary&lt;string, object&gt;, System.Threading.Tasks.Task&gt;&gt;;</code></p>
+<p><code>docker build -t jchannon/jsonfile --rm .</code> </p>
 
-<p>Using our sample middleware above the extension class would now have to look like this:</p>
+<p><code>docker run -t —name json jchannon/jsonfile</code></p>
 
-<pre><code>using System;
+<p>Add a breakpoint to you application</p>
 
-using MidFunc = System.Func&lt;System.Func&lt;System.Collections.Generic.IDictionary&lt;string, object&gt;,
-        System.Threading.Tasks.Task&gt;, System.Func&lt;System.Collections.Generic.IDictionary&lt;string, object&gt;,
-        System.Threading.Tasks.Task&gt;&gt;;
+<p>Go to VSCode Debug pane, select <code>.NET Core Remote Attach</code> and hit F5</p>
 
-public static class MyMiddlewareExtensions
-{
-    public static Action&lt;MidFunc&gt; UseMyMiddleware(this Action&lt;MidFunc&gt; builder, MyMiddlewareOptions options = null)
-    {
-        builder(next =&gt; new MyMiddleware(next, options).Invoke);
-        return builder;
-    }
-}
-</code></pre>
+<p>SUCCESS!!</p>
 
-<p>This can now be used in a ASP.NET Core Startup class like so:</p>
-
-<pre><code>public void Configure(IApplicationBuilder app)
-{
-  //Use the ASP.Net Core OWIN bridge
-  app.UseOwin(x =&gt; 
-  {
-      x.UseMyMiddleware(new MyMiddlewareOptions());
-      x.UseNancy();
-  });  
-}
-</code></pre>
-
-<p>Tada!  Also note that I only call <code>UseOwin</code> once, I don't need to call it for every OWIN middleware I have.  Also just to be clear, if you want your middleware to run on .Net Core you will still have to make sure your middleware is compatible.  The above shows  how you came make your OWIN middleware run in ASP.Net Core pipeline even if its on .Net 4.5 but if it is compatible with .Net Core you can target that from your application and bingo! That is exactly what I have done with my middleware. </p>
-
-<p>Happy coding!</p>
+<p>One thing to note with this is, is that you cannot debug a project that has been compiled in Release mode.  Whilst the config above looks like it should work it doesn't. I tried! I believe there may be plans to allow this and the issue can be tracked <a href="https://github.com/OmniSharp/omnisharp-vscode/issues/220">here</a> .  A sample application and Dockerfile can be found <a href="https://github.com/jchannon/DockerDebug">here</a> </p>
 
     </div> 
     <div id="tagcloud">
-     <a href="/category/asp.net"><span>ASP.Net</span></a>
+     <a href="/category/asp.net"><span>ASP.NET</span></a>
+     <a href="/category/c"><span>C#</span></a>
+     <a href="/category/docker"><span>Docker</span></a>
      <a href="/category/oss"><span>OSS</span></a>
-     <a href="/category/owin"><span>OWIN</span></a>
     </div>
     <span itemprop="author" itemscope itemtype="http://schema.org/Person">
         <meta itemprop="name" content="Jonathan Channon">
@@ -182,14 +163,14 @@ public static class MyMiddlewareExtensions
             reload: true,
             config: function () {
                 //this.page.identifier = '';
-                this.page.url = 'http://blog.jonathanchannon.com/2016/06/27/porting-owin-middleware-aspnetcore/';
+                this.page.url = 'http://blog.jonathanchannon.com/2017/06/07/debugging-netcore-docker/';
                 //this.page.title = '';
             }
         });
     };
 
     var disqus_shortname = 'jonathanchannonblog';
-    var disqus_url = 'http://blog.jonathanchannon.com/2016/06/27/porting-owin-middleware-aspnetcore/';
+    var disqus_url = 'http://blog.jonathanchannon.com/2017/06/07/debugging-netcore-docker/';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
